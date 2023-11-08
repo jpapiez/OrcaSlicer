@@ -1,6 +1,6 @@
 {
   "type": "machine",
-  "setting_id": "GM007",
+  "setting_id": "GM004",
   "name": "Voron Trident 350 1.0 nozzle",
   "from": "system",
   "instantiation": "true",
