@@ -1,0 +1,17 @@
+{
+  "type": "machine",
+  "setting_id": "GM003",
+  "name": "Prusa MINIIS 0.6 nozzle",
+  "from": "system",
+  "instantiation": "true",
+  "inherits": "fdm_miniis_common",
+  "gcode_flavor": "marlin2",
+  "printer_model": "MINIIS",
+  "default_print_profile": "0.30mm Standard @MINIIS",
+  "nozzle_diameter": [
+      "0.6"
+  ],
+  "scan_first_layer": "0",
+  "nozzle_type": "hardened_steel",
+  "printer_variant": "0.6"
+}
