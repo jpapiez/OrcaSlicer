@@ -1,6 +1,6 @@
 {
     "name": "Prusa",
-    "version": "01.09.00.02",
+    "version": "01.09.00.03",
     "force_update": "0",
     "description": "Prusa configurations",
     "machine_model_list": [
@@ -15,6 +15,10 @@
         {
             "name": "MINI",
             "sub_path": "machine/Prusa MINI.json"
+        },
+        {
+            "name": "MINIIS",
+            "sub_path": "machine/Prusa MINIIS.json"
         }
     ],
     "process_list": [
@@ -37,6 +41,10 @@
         {
             "name": "0.05mm UltraDetail @MK3S 0.25",
             "sub_path": "process/0.05mm UltraDetail @MK3S 0.25.json"
+        },
+        {
+            "name": "0.05mm UltraDetail @MK3S",
+            "sub_path": "process/0.05mm UltraDetail @MK3S.json"
         },		
 		{
             "name": "0.05mm UltraDetail @MK3S 0.4",
@@ -53,6 +61,10 @@
 		{
             "name": "0.10mm Detail @MK3S 0.25",
             "sub_path": "process/0.10mm Detail @MK3S 0.25.json"
+        },
+        {
+            "name": "0.20mm Standard @MINIIS",
+            "sub_path": "process/0.20mm Standard @MINIIS.json"
         },
         {
             "name": "0.10mm Detail @MK3S 0.4",
@@ -296,6 +308,10 @@
         {
             "name": "Prusa MINI 0.4 nozzle",
             "sub_path": "machine/Prusa MINI 0.4 nozzle.json"
+        },
+        {
+            "name": "Prusa MINIIS 0.4 nozzle",
+            "sub_path": "machine/Prusa MINIIS 0.4 nozzle.json"
         }
     ]
 }

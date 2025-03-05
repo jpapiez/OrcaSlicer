@@ -1,16 +1,16 @@
 {
   "type": "machine",
   "setting_id": "GM003",
-  "name": "Prusa MINI 0.4 nozzle",
+  "name": "Prusa MINIIS 0.4 nozzle",
   "from": "system",
   "instantiation": "true",
   "inherits": "fdm_machine_common",
   "gcode_flavor": "marlin2",
-  "printer_model": "MINI",
+  "printer_model": "MINIIS",
   "default_filament_profile": [
       "Prusa Generic PLA"
   ],
-  "default_print_profile": "0.20mm Standard @MINI",
+  "default_print_profile": "0.20mm Standard @MINIIS",
   "nozzle_diameter": [
       "0.4"
   ],
@@ -24,20 +24,28 @@
     "0x180"
   ],
   "machine_max_acceleration_extruding": [
-    "1250",
-    "2000"
+    "4000",
+    "3000"
+  ],
+  "machine_max_acceleration_travel": [
+    "4000",
+    "3000"
   ],
   "machine_max_acceleration_x": [
-      "2500",
+      "4000",
       "2000"
   ],
   "machine_max_acceleration_y": [
-      "2500",
+      "4000",
       "2000"
   ],
   "machine_max_acceleration_z": [
       "400",
       "200"
+  ],
+  "machine_max_jerk_z": [
+    "2",
+    "0.4"
   ],
   "machine_max_jerk_e": [
       "10",
@@ -56,11 +64,11 @@
       "25"
   ],
   "machine_max_speed_x": [
-      "180",
+      "400",
       "200"
   ],
   "machine_max_speed_y": [
-      "180",
+      "400",
       "200"
   ],
   "retraction_length": [
@@ -79,6 +87,7 @@
   "machine_pause_gcode": "M601",
   "machine_start_gcode": "M862.3 P \"[printer_model]\" ; printer model check\nG90 ; use absolute coordinates\nM83 ; extruder relative mode\nM104 S170 ; set extruder temp for bed leveling\nM140 S[first_layer_bed_temperature] ; set bed temp\nM109 R170 ; wait for bed leveling temp\nM190 S[first_layer_bed_temperature] ; wait for bed temp\nM204 T1250 ; set travel acceleration\nG28 ; home all without mesh bed level\nG29 ; mesh bed leveling \nM204 T[machine_max_acceleration_travel] ; restore travel acceleration\nM104 S[first_layer_temperature] ; set extruder temp\nG92 E0\nG1 Y-2 X179 F2400\nG1 Z3 F720\nM109 S[first_layer_temperature] ; wait for extruder temp\n\n; intro line\nG1 X170 F1000\nG1 Z0.2 F720\nG1 X110 E8 F900\nG1 X40 E10 F700\nG92 E0\n\nM221 S95 ; set flow",
   "printer_notes": "Don't remove the following keywords! These keywords are used in the \"compatible printer\" condition of the print and filament profiles to link the particular print and filament profiles to this printer profile.\nPRINTER_VENDOR_PRUSA3D\nPRINTER_MODEL_MINI\n",
+
   "scan_first_layer": "0",
   "machine_load_filament_time": "17",
   "machine_unload_filament_time": "16",

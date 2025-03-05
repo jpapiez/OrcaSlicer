@@ -43,7 +43,7 @@
   "top_surface_line_width": "0.6",
   "top_surface_speed": "45",  
   "wall_loops": "2",
-    "compatible_printers": [   
+  "compatible_printers": [   
     "Prusa MK3S 0.6 nozzle"    
   ]
 }

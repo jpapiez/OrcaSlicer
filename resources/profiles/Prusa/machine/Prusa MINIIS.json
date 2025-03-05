@@ -1,7 +1,7 @@
 {
   "type": "machine_model",
-  "name": "Prusa MINI",
-  "model_id": "MINI",
+  "name": "Prusa MINIIS",
+  "model_id": "MINIIS",
   "nozzle_diameter": "0.4",
   "machine_tech": "FFF",
   "family": "Prusa",
