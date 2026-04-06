@@ -7524,14 +7524,29 @@ wxString GUI_App::current_language_code_safe() const
 		{ "ko", 	"ko_KR", },
 		{ "pl", 	"pl_PL", },
 		{ "uk", 	"uk_UA", },
-		{ "zh", 	"zh_CN", },
 		{ "ru", 	"ru_RU", },
         { "tr", 	"tr_TR", },
         { "pt", 	"pt_BR", },
         { "lt", 	"lt_LT", },
         { "vi", 	"vi_VN", },
 	};
+	// Chinese locale needs special handling: distinguish Traditional (zh_TW) vs Simplified (zh_CN)
+	static const std::map<wxString, wxString> zhMapping {
+		{ "zh_hans",    "zh_CN", },
+		{ "zh_cn",      "zh_CN", },
+		{ "zh_hk",      "zh_CN", },
+		{ "zh_hant",    "zh_TW", },
+		{ "zh_tw",      "zh_TW", },
+	};
 	wxString language_code = this->current_language_code().BeforeFirst('_');
+	if (language_code == "zh") {
+		auto it = zhMapping.find(this->current_language_code().Lower());
+		if (it != zhMapping.end()) {
+			return it->second;
+		}
+		language_code = "zh_CN"; // fallback to Simplified Chinese
+		return language_code;
+	}
 	auto it = mapping.find(language_code);
 	if (it != mapping.end())
 		language_code = it->second;
