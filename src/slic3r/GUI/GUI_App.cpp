@@ -80,6 +80,9 @@
 
 #include "DeviceCore/DevManager.h"
 
+#include "PhrozenGUI/PhrozenMonitorController.hpp"
+#include "PhrozenGUI/PhrozenDeviceManager.hpp"
+
 #include "../Utils/PresetUpdater.hpp"
 #include "../Utils/PrintHost.hpp"
 #include "../Utils/Process.hpp"
@@ -973,6 +976,12 @@ void GUI_App::post_init()
     hms_query = new HMSQuery();
 
     m_show_gcode_window = app_config->get_bool("show_gcode_window");
+
+    // Initialize Phrozen Developer Mode from config
+    if (app_config->has("phrozen_developer_mode")) {
+        m_bPhrozenDeveloperMode = app_config->get_bool("phrozen_developer_mode");
+    }
+
     if (m_networking_need_update) {
         show_network_plugin_download_dialog(false);
     }

@@ -64,6 +64,7 @@
 #include "DailyTips.hpp"
 #include "FilamentMapDialog.hpp"
 
+#include "PhrozenGUI/PhrozenMonitor.hpp"
 #include "DeviceCore/DevManager.h"
 
 #ifdef _WIN32
@@ -1291,6 +1292,10 @@ void MainFrame::init_tabpanel() {
     m_monitor = new MonitorPanel(m_tabpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
     m_monitor->SetBackgroundColour(*wxWHITE);
     m_tabpanel->AddPage(m_monitor, _L("Device"), std::string("tab_monitor_active"), std::string("tab_monitor_active"), false);
+
+    // Phrozen Monitor panel (active when Phrozen printer selected)
+    m_PhrozenMonitor = new PhrozenMonitorPanel(m_tabpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    m_PhrozenMonitor->SetBackgroundColour(*wxWHITE);
 
     m_printer_view = new PrinterWebView(m_tabpanel);
     Bind(EVT_LOAD_PRINTER_URL, [this](LoadPrinterViewEvent &evt) {

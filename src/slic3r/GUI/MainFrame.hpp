@@ -19,6 +19,7 @@
 //BBS: GUI refactor
 #include "ParamsPanel.hpp"
 #include "Monitor.hpp"
+#include "PhrozenGUI/PhrozenMonitor.hpp"
 #include "Auxiliary.hpp"
 #include "Project.hpp"
 #include "CalibrationPanel.hpp"
@@ -377,7 +378,6 @@ public:
     //BBS: GUI refactor
     MonitorPanel*         m_monitor{ nullptr };
     // Phrozen integration
-    class PhrozenMonitorPanel;
     PhrozenMonitorPanel*  m_PhrozenMonitor{ nullptr };
 
     //AuxiliaryPanel*       m_auxiliary{ nullptr };
