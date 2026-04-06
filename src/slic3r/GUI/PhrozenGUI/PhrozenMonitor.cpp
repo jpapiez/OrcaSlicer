@@ -19,6 +19,7 @@
 
 #include "../wxExtensions.hpp"
 #include "../GUI_App.hpp"
+#include "../DeviceCore/DevManager.h"
 #include "../GUI_ObjectList.hpp"
 #include "../Plater.hpp"
 #include "../MainFrame.hpp"
@@ -97,7 +98,7 @@ PhrozenMonitorPanel::~PhrozenMonitorPanel()
     if (!dev) return;
     MachineObject *obj_ = dev->get_selected_machine();
     if (obj_)
-        GUI::wxGetApp().sidebar().load_ams_list(obj_->dev_id, obj_);
+        GUI::wxGetApp().sidebar().load_ams_list(obj_->get_dev_id(), obj_);
 }
 
   void PhrozenMonitorPanel::init_tabpanel()
@@ -203,37 +204,35 @@ void PhrozenMonitorPanel::update_all()
     if (m_status_info_panel->IsShown() && MonitorControl::IsStartReceiving() ) 
     {
         show_status(MONITOR_NORMAL);
-        auto pManager = wxGetApp().GetPhrozenDeviceManager();
-        if ( pManager )
-        {
-            auto pMachineObj = pManager->GetConnectingMachine();
-            if ( pMachineObj )
-            {
-                // new flow for recieve webcam
-                m_side_tools->set_current_printer_name( pMachineObj->GetMachineIp() );
-                m_status_info_panel->SetPhrozenMachineObject( pMachineObj );
-
-                // origin flow for other panel result
-                auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
-                m_status_info_panel->SetMachineObject( pPhrozenMachineObj );
-                m_status_info_panel->update( pPhrozenMachineObj );
-            }
-            else
-            {
-                //TODO reset and disable ui
-            }
-        }
+        // TODO: GetPhrozenDeviceManager not yet ported
+        // auto pManager = wxGetApp().GetPhrozenDeviceManager();
+        // if ( pManager )
+        // {
+        //     auto pMachineObj = pManager->GetConnectingMachine();
+        //     if ( pMachineObj )
+        //     {
+        //         m_side_tools->set_current_printer_name( pMachineObj->GetMachineIp() );
+        //         m_status_info_panel->SetPhrozenMachineObject( pMachineObj );
+        //         auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
+        //         m_status_info_panel->SetMachineObject( pPhrozenMachineObj );
+        //         m_status_info_panel->update( pPhrozenMachineObj );
+        //     }
+        //     else
+        //     {
+        //         //TODO reset and disable ui
+        //     }
+        // }
 
     }
     else
     {
-        auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
-        if ( pPhrozenMachineObj && m_last_status == MONITOR_NORMAL )
-        {   
-            //call disconnect from ui side, to prevent machine object killed when ui updating
-            wxCommandEvent disconnectEvent;
-            OnDisconnectMachine( disconnectEvent );
-        }
+        // TODO: GetPhrozenMachineObject not yet ported
+        // auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
+        // if ( pPhrozenMachineObj && m_last_status == MONITOR_NORMAL )
+        // {   
+        //     wxCommandEvent disconnectEvent;
+        //     OnDisconnectMachine( disconnectEvent );
+        // }
         m_side_tools->set_none_printer_mode();
         show_status(MONITOR_UNKNOWN);
     }
@@ -244,7 +243,7 @@ void PhrozenMonitorPanel::update_all()
 
     // check valid machine
     if (obj && !obj->IsPhrozenConnected() ) {
-        obj->dev_ip = "";
+        obj->set_dev_ip("");
         show_status((int)MONITOR_NO_PRINTER);
         return;
     }

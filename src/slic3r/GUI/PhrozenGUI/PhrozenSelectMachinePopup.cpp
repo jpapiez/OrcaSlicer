@@ -1151,8 +1151,8 @@ bool PhrozenSelectMachinePopup::search_for_printer(MachineObject* obj)
 	if (search_text.empty()) {
 		return true;
 	}
-	auto name = obj->dev_name;
-	auto ip = obj->dev_ip;
+	auto name = obj->get_dev_name();
+	auto ip = obj->get_dev_ip();
 	auto name_it = name.find(search_text);
 	auto ip_it = ip.find(search_text);
 	if ((name_it != std::string::npos)||(ip_it != std::string::npos)) {
@@ -1261,7 +1261,7 @@ void PhrozenEditDevNameDialog::set_machine_obj(MachineObject *obj)
 {
     m_info = obj;
     if (m_info)
-        m_textCtr->GetTextCtrl()->SetValue(from_u8(m_info->dev_name));
+        m_textCtr->GetTextCtrl()->SetValue(from_u8(m_info->get_dev_name()));
 }
 
 void PhrozenEditDevNameDialog::on_dpi_changed(const wxRect &suggested_rect)
@@ -1320,7 +1320,7 @@ void PhrozenEditDevNameDialog::on_edit_name(wxCommandEvent &e)
             auto           utf8_str = new_dev_name.ToUTF8();
             auto           name     = std::string(utf8_str.data(), utf8_str.length());
             if (m_info)
-                dev->modify_device_name(m_info->dev_id, name);
+                dev->modify_device_name(m_info->get_dev_id(), name);
         }
         DPIDialog::EndModal(wxID_CLOSE);
     }

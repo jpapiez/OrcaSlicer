@@ -28,6 +28,7 @@
 #include "../Widgets/ImageSwitchButton.hpp"
 #include "../Widgets/AMSControl.hpp"
 #include "../Widgets/FanControl.hpp"
+#include "PhrozenDeviceManager.hpp"
 #include "../HMS.hpp"
 #include "../StatusPanel.hpp"
 
@@ -351,6 +352,8 @@ public:
 
     void SetMachineObject( MachineObject* pObj ) { obj = pObj; }
     MachineObject* obj{nullptr};
+    // Convenience accessor: returns obj as PhrozenMachineObject* via dynamic_cast
+    PhrozenMachineObject* phrozen_obj() const { return dynamic_cast<PhrozenMachineObject*>(obj); }
 
     void SetPhrozenMachineObject( PhrozenMachineObject_Dev* pObj ) { m_pMachineObj = pObj; }
     PhrozenMachineObject_Dev* PhrozenObj() { return m_pMachineObj; }
@@ -489,7 +492,8 @@ protected:
     SecondaryCheckDialog* ctrl_e_hint_dlg = nullptr;
     SecondaryCheckDialog* sdcard_hint_dlg = nullptr;
      
-    FanControlPopup* m_fan_control_popup{nullptr};
+    // TODO: Adapt to OrcaSlicer's FanControlPopupNew (different constructor signature)
+    // FanControlPopup* m_fan_control_popup{nullptr};
 
     wxString     m_request_url;
     bool         m_start_loading_thumbnail = false;

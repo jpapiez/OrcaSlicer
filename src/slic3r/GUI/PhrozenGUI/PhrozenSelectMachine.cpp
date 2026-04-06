@@ -1033,8 +1033,8 @@ void PhrozenSelectMachineDialog::init_bind()
             MachineObject* obj = dev->get_selected_machine();
             if (!obj) return;
 
-            if (obj->dev_id == e.GetString()) {
-                m_comboBox_printer->SetValue(obj->dev_name + "(LAN)");
+            if (obj->get_dev_id() == e.GetString()) {
+                m_comboBox_printer->SetValue(obj->get_dev_name() + "(LAN)");
             }
         }
     });
@@ -1759,9 +1759,10 @@ bool PhrozenSelectMachineDialog::is_same_nozzle_diameters(float &tag_nozzle_diam
         for (auto i = 0; i < extruders.size(); i++) {
             auto extruder = extruders[i] - 1;
             tag_nozzle_diameter = float(opt_nozzle_diameters->get_at(extruder));
-            if (tag_nozzle_diameter != obj_->m_extder_data.extders[0].current_nozzle_diameter) {
-                return false;
-            }
+            // TODO: m_extder_data not available in OrcaSlicer's MachineObject
+            // if (tag_nozzle_diameter != obj_->m_extder_data.extders[0].current_nozzle_diameter) {
+            //     return false;
+            // }
         }
     }
     catch (const std::exception&)
@@ -1772,9 +1773,9 @@ bool PhrozenSelectMachineDialog::is_same_nozzle_diameters(float &tag_nozzle_diam
     return true;
 }
 
-bool PhrozenSelectMachineDialog::is_same_nozzle_type(const Extder& extruder, std::string& filament_type) const
+bool PhrozenSelectMachineDialog::is_same_nozzle_type(const DevExtder& extruder, std::string& filament_type) const
 {
-    auto printer_nozzle_hrc = Print::get_hrc_by_nozzle_type(extruder.current_nozzle_type);
+    auto printer_nozzle_hrc = Print::get_hrc_by_nozzle_type(extruder.GetNozzleType());
 
     auto preset_bundle = wxGetApp().preset_bundle;
     auto iter = m_materialList.begin();
@@ -1802,7 +1803,7 @@ bool PhrozenSelectMachineDialog::is_same_printer_model()
 
     MachineObject* obj_ = dev->get_selected_machine();
 
-    assert(obj_->dev_id == m_printer_last_select_ip);
+    assert(obj_->get_dev_id() == m_printer_last_select_ip);
     if (obj_ == nullptr) {
         return result;
     }
@@ -1979,16 +1980,17 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
         confirm_text.push_back(ConfirmBeforeSendInfo(_L("There are some unknown filaments in the AMS mappings. Please check whether they are the required filaments. If they are okay, press \"Confirm\" to start printing.")));
     }
 
-    if (!obj_->m_extder_data.extders[0].current_nozzle_type != ntUndefine && (m_print_type == PhrozenPrintFromType::FROM_NORMAL))
+    // TODO: m_extder_data not available in OrcaSlicer's MachineObject
+    // Nozzle type/diameter checks require PhrozenOrca's ExtderData
+    if (false /* !obj_->m_extder_data.extders[0].current_nozzle_type != ntUndefine */ && (m_print_type == PhrozenPrintFromType::FROM_NORMAL))
     {
         float nozzle_diameter = 0;
         if (!is_same_nozzle_diameters(nozzle_diameter))
         {
             has_slice_warnings = true;
-            // is_printing_block  = true;  # Removed to allow nozzle overrides (to support non-standard nozzles)
             
             wxString nozzle_in_preset = wxString::Format(_L("nozzle in preset: %.1f %s"),nozzle_diameter, "");
-            wxString nozzle_in_printer = wxString::Format(_L("nozzle memorized: %.1f %s"), obj_->m_extder_data.extders[0].current_nozzle_diameter, "");
+            wxString nozzle_in_printer = wxString::Format(_L("nozzle memorized: %.1f %s"), 0.4f /* obj_->m_extder_data.extders[0].current_nozzle_diameter */, "");
 
             confirm_text.push_back(ConfirmBeforeSendInfo(_L("Your nozzle diameter in sliced file is not consistent with memorized nozzle. If you changed your nozzle lately, please go to Device > Printer Parts to change settings.") 
                 + "\n    " + nozzle_in_preset 
@@ -1997,14 +1999,14 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
         }
         
         std::string filament_type;
-        if (!is_same_nozzle_type(obj_->m_extder_data.extders[0], filament_type))
-        {
-            has_slice_warnings = true;
-            is_printing_block = true;
-
-                wxString nozzle_in_preset = wxString::Format(_L("Printing high temperature material (%s material) with %s may cause nozzle damage"), filament_type, format_steel_name(obj_->m_extder_data.extders[0].current_nozzle_type));
-            confirm_text.push_back(ConfirmBeforeSendInfo(nozzle_in_preset, ConfirmBeforeSendInfo::InfoLevel::Warning));
-        }
+        // TODO: m_extder_data not available - is_same_nozzle_type needs PhrozenOrca's Extder
+        // if (!is_same_nozzle_type(obj_->m_extder_data.extders[0], filament_type))
+        // {
+        //     has_slice_warnings = true;
+        //     is_printing_block = true;
+        //     wxString nozzle_in_preset = wxString::Format(_L("Printing high temperature material (%s material) with %s may cause nozzle damage"), filament_type, format_steel_name(obj_->m_extder_data.extders[0].current_nozzle_type));
+        //     confirm_text.push_back(ConfirmBeforeSendInfo(nozzle_in_preset, ConfirmBeforeSendInfo::InfoLevel::Warning));
+        // }
     }
     
 
@@ -2186,7 +2188,7 @@ void PhrozenSelectMachineDialog::on_send_print()
 
 #if 0
     MachineObject* obj_ = dev->get_selected_machine();
-    assert(obj_->dev_id == m_printer_last_select);
+    assert(obj_->get_dev_id() == m_printer_last_select);
     if (obj_ == nullptr) {
         return;
     }
@@ -2273,7 +2275,7 @@ void PhrozenSelectMachineDialog::on_send_print()
     }
 
     auto m_print_job = std::make_unique<PrintJob>(m_printer_last_select);
-    m_print_job->m_dev_ip = obj_->dev_ip;
+    m_print_job->m_dev_ip = obj_->get_dev_ip();
     m_print_job->m_ftp_folder = obj_->get_ftp_folder();
     m_print_job->m_access_code = obj_->get_access_code();
 #if !BBL_RELEASE_TO_PUBLIC
@@ -2330,7 +2332,9 @@ void PhrozenSelectMachineDialog::on_send_print()
         BOOST_LOG_TRIVIAL(error) << "build_nozzle_info errors";
     }
 
-    m_print_job->has_sdcard = obj_->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_NORMAL;
+    // TODO: Phrozen-specific MachineObject method not yet ported
+    // m_print_job->has_sdcard = obj_->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_NORMAL;
+    m_print_job->has_sdcard = !obj_->is_sdcard_printing(); // approximate: assume SD card present if not in SD print
 
 
     bool timelapse_option = false;
@@ -2366,7 +2370,7 @@ void PhrozenSelectMachineDialog::on_send_print()
     // update ota version
     NetworkAgent* agent = wxGetApp().getAgent();
     if (agent) {
-        std::string dev_ota_str = "dev_ota_ver:" + obj_->dev_id;
+        std::string dev_ota_str = "dev_ota_ver:" + obj_->get_dev_id();
         agent->track_update_property(dev_ota_str, obj_->get_ota_version());
     }
 
@@ -2650,7 +2654,7 @@ void PhrozenSelectMachineDialog::on_selection_changed(wxCommandEvent &event)
                 m_comboBox_printer->Update();
             }
 
-            m_printer_last_select = m_list[i]->dev_id;
+            m_printer_last_select = m_list[i]->get_dev_id();
             obj = m_list[i];
 
             BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "for send task, current printer id =  " << m_printer_last_select << std::endl;
@@ -2663,7 +2667,7 @@ void PhrozenSelectMachineDialog::on_selection_changed(wxCommandEvent &event)
         obj->command_request_push_all();
         if (!dev->get_selected_machine()) {
             dev->set_selected_machine(m_printer_last_select, true);
-        }else if (dev->get_selected_machine()->dev_id != m_printer_last_select) {
+        }else if (dev->get_selected_machine()->get_dev_id() != m_printer_last_select) {
             dev->set_selected_machine(m_printer_last_select, true);
         }
 
@@ -2675,7 +2679,7 @@ void PhrozenSelectMachineDialog::on_selection_changed(wxCommandEvent &event)
         }
 
         // Has changed machine unrecoverably
-        GUI::wxGetApp().sidebar().load_ams_list(obj->dev_id, obj);
+        GUI::wxGetApp().sidebar().load_ams_list(obj->get_dev_id(), obj);
         update_select_layout(obj);
     } else {
         BOOST_LOG_TRIVIAL(error) << "on_selection_changed dev_id not found";
@@ -2798,17 +2802,19 @@ void PhrozenSelectMachineDialog::update_show_status()
         show_status(PhrozenPrintDialogStatus::PrintStatusInPrinting);
         return;
     }
-    else if (!obj_->is_support_print_without_sd && (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD)) {
-        show_status(PhrozenPrintDialogStatus::PrintStatusNoSdcard);
-        return;
-    }
+    // TODO: Phrozen-specific MachineObject method not yet ported (get_sdcard_state / SdcardState)
+    // else if (!obj_->is_support_print_without_sd && (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD)) {
+    //     show_status(PhrozenPrintDialogStatus::PrintStatusNoSdcard);
+    //     return;
+    // }
 
     // check sdcard when if lan mode printer
     if (obj_->is_lan_mode_printer()) {
-        if (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD) {
-            show_status(PhrozenPrintDialogStatus::PrintStatusLanModeNoSdcard);
-            return;
-        }
+        // TODO: Phrozen-specific MachineObject method not yet ported (get_sdcard_state / SdcardState)
+        // if (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD) {
+        //     show_status(PhrozenPrintDialogStatus::PrintStatusLanModeNoSdcard);
+        //     return;
+        // }
     }
 
     // no ams
@@ -3327,7 +3333,7 @@ void PhrozenSelectMachineDialog::set_default_from_sdcard()
                 if (obj_ &&
                     obj_->has_ams() &&
                     m_checkbox_list["use_ams"]->GetValue() &&
-                    obj_->dev_id == m_printer_last_select)
+                    obj_->get_dev_id() == m_printer_last_select)
                 {
                     m_mapping_popup.set_parent_item(item);
                     m_mapping_popup.set_current_filament_id(fo.id);

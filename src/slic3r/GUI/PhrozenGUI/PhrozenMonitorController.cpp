@@ -30,6 +30,30 @@
 #include <windows.h>
 #endif
 
+// curl WebSocket API compatibility shims.
+// The WebSocket API (curl_ws_send, curl_ws_recv, etc.) requires curl >= 7.86.0.
+// Provide stub definitions so the code compiles with older curl versions.
+#include <curl/curlver.h>
+#if LIBCURL_VERSION_NUM < 0x075600
+#ifndef CURLWS_TEXT
+struct curl_ws_frame { unsigned int flags; curl_off_t offset; curl_off_t bytesleft; size_t len; };
+#define CURLWS_TEXT   (1<<0)
+#define CURLWS_BINARY (1<<1)
+#define CURLWS_CONT   (1<<2)
+#define CURLWS_CLOSE  (1<<3)
+#define CURLWS_PING   (1<<4)
+#define CURLWS_PONG   (1<<5)
+#define CURLWS_FIN    (1<<7)
+static inline CURLcode curl_ws_send(CURL*, const void*, size_t, size_t* sent, curl_off_t, unsigned int) { if (sent) *sent = 0; return CURLE_NOT_BUILT_IN; }
+static inline CURLcode curl_ws_recv(CURL*, void*, size_t, size_t* rlen, const struct curl_ws_frame** meta) {
+    static const struct curl_ws_frame empty_frame = {0, 0, 0, 0};
+    if (rlen) *rlen = 0;
+    if (meta) *meta = &empty_frame;
+    return CURLE_NOT_BUILT_IN;
+}
+#endif // CURLWS_TEXT
+#endif // LIBCURL_VERSION_NUM
+
 
 //namespace Slic3r {
 //namespace GUI {

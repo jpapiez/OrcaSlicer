@@ -29,6 +29,8 @@
 #include "../GUI_Utils.hpp"
 #include "../wxExtensions.hpp"
 #include "../DeviceManager.hpp"
+#include "../DeviceCore/DevManager.h"
+#include "../DeviceCore/DevExtruderSystem.h"
 #include "../Plater.hpp"
 #include "../BBLStatusBar.hpp"
 #include "../BBLStatusBarSend.hpp"
@@ -389,7 +391,7 @@ public:
     bool is_same_printer_model();
     bool is_blocking_printing(MachineObject* obj_);
     bool is_same_nozzle_diameters(float& tag_nozzle_diameter) const;
-    bool is_same_nozzle_type(const Extder& extruder, std::string& filament_type) const;
+    bool is_same_nozzle_type(const DevExtder& extruder, std::string& filament_type) const;
     bool is_timeout();
     int  update_print_required_data(Slic3r::DynamicPrintConfig config, Slic3r::Model model, Slic3r::PlateDataPtrs plate_data_list, std::string file_name, std::string file_path);
     void set_print_type(PhrozenPrintFromType type) {m_print_type = type;};

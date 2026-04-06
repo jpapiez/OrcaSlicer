@@ -19,90 +19,90 @@ public:
     PhrozenMachineObject( std::string ip );
     ~PhrozenMachineObject();
 
-    virtual float GetPhrozenBedTemperature() override;
-    virtual float GetPhrozenNozzleTemperature() override;
-    virtual float GetPhrozenPrintSpeed() override;
-    virtual float GetPhrozenAuxiliaryCoolingSpeed() override;
-    virtual float GetPhrozenPartCoolingSpeed() override;
-    virtual float GetPhrozenShieldCoolingSpeed() override;
+    virtual float GetPhrozenBedTemperature();
+    virtual float GetPhrozenNozzleTemperature();
+    virtual float GetPhrozenPrintSpeed();
+    virtual float GetPhrozenAuxiliaryCoolingSpeed();
+    virtual float GetPhrozenPartCoolingSpeed();
+    virtual float GetPhrozenShieldCoolingSpeed();
 
-    virtual float GetPhrozenBedTargetTemperature() override;
-    virtual float GetPhrozenNozzleTargetTemperature() override;
-    virtual float GetPhrozenZOffset() override;
+    virtual float GetPhrozenBedTargetTemperature();
+    virtual float GetPhrozenNozzleTargetTemperature();
+    virtual float GetPhrozenZOffset();
 
-    virtual int GetPhrozenBedTemperature_limit() override;
-    virtual int GetPhrozenNozzleTemperature_limit() override;
+    virtual int GetPhrozenBedTemperature_limit();
+    virtual int GetPhrozenNozzleTemperature_limit();
     // print states
-    virtual std::string GetPhrozenPrintStatus() override;
-    virtual std::string GetPhrozenPrintFile() override;
-    virtual std::string GetPhrozenThumbnailPath() override;
-    virtual void GetPhrozenThumbnailInfo(std::string) override;
-    virtual void GetPhrozenThumbnailImage(std::string) override;
-    virtual bool GetPhrozenThumbnailAsBitmap(const std::string& gcodeName, wxBitmap& thumbnailBitmap) override;
-    virtual float GetPhrozenPrintProgress() override;
-    virtual float GetPhrozenPrintTime() override;
-    virtual float GetPhrozenTotalTime() override;
-    virtual float GetPhrozenPrintFilamentAmount() override;
-    virtual std::string GetPhrozenSendPrintTime() override;
-    virtual bool IsPrintPaused() override;
+    virtual std::string GetPhrozenPrintStatus();
+    virtual std::string GetPhrozenPrintFile();
+    virtual std::string GetPhrozenThumbnailPath();
+    virtual void GetPhrozenThumbnailInfo(std::string);
+    virtual void GetPhrozenThumbnailImage(std::string);
+    virtual bool GetPhrozenThumbnailAsBitmap(const std::string& gcodeName, wxBitmap& thumbnailBitmap);
+    virtual float GetPhrozenPrintProgress();
+    virtual float GetPhrozenPrintTime();
+    virtual float GetPhrozenTotalTime();
+    virtual float GetPhrozenPrintFilamentAmount();
+    virtual std::string GetPhrozenSendPrintTime();
+    virtual bool IsPrintPaused();
 
-    virtual bool GetPhrozenCommand_lighting_enabled() override;
+    virtual bool GetPhrozenCommand_lighting_enabled();
 
-    virtual double GetPhrozenSendFileProgress() override;
+    virtual double GetPhrozenSendFileProgress();
 
     // set command to machine
     //control
-    virtual void SetPhrozenCommand_bed_temp( int nTemp ) override;
-    virtual void SetPhrozenCommand_nozzle_temp( int nTemp ) override;
-    virtual void SetPhrozenCommand_cooling_auxiliary( int nPower ) override;
-    virtual void SetPhrozenCommand_cooling_part( int nPower ) override;
-    virtual void SetPhrozenCommand_cooling_shield( int nPower ) override;
-    virtual void SetPhrozenCommand_print_speed( float fValue ) override;
-    virtual void SetPhrozenCommand_nozzle_movement( std::string ,float fValue ) override;
-    virtual void SetPhrozenCommand_nozzle_offset(float fValue ) override;
+    virtual void SetPhrozenCommand_bed_temp( int nTemp );
+    virtual void SetPhrozenCommand_nozzle_temp( int nTemp );
+    virtual void SetPhrozenCommand_cooling_auxiliary( int nPower );
+    virtual void SetPhrozenCommand_cooling_part( int nPower );
+    virtual void SetPhrozenCommand_cooling_shield( int nPower );
+    virtual void SetPhrozenCommand_print_speed( float fValue );
+    virtual void SetPhrozenCommand_nozzle_movement( std::string ,float fValue );
+    virtual void SetPhrozenCommand_nozzle_offset(float fValue );
     //ams
-    virtual void SetPhrozenCommand_load(int filament_id) override;
-    virtual void SetPhrozenCommand_unload(int filament_id) override;
-    virtual void SetPhrozenCommand_unload_all_slots() override;
-    virtual void SetPhrozenCommand_nozzle_filament_check() override;
+    virtual void SetPhrozenCommand_load(int filament_id);
+    virtual void SetPhrozenCommand_unload(int filament_id);
+    virtual void SetPhrozenCommand_unload_all_slots();
+    virtual void SetPhrozenCommand_nozzle_filament_check();
     //print control pause, resume,abort
-    virtual bool SetPhrozenCommand_pause() override;
-    virtual bool SetPhrozenCommand_resume() override;
-    virtual bool SetPhrozenCommand_abort() override;
-    virtual bool SetPhrozenCommand_sendandprint(std::string) override;
+    virtual bool SetPhrozenCommand_pause();
+    virtual bool SetPhrozenCommand_resume();
+    virtual bool SetPhrozenCommand_abort();
+    virtual bool SetPhrozenCommand_sendandprint(std::string);
 
-    virtual void SetPhrozenCommand_lighting_enabled(  bool bEnabled ) override;
+    virtual void SetPhrozenCommand_lighting_enabled(  bool bEnabled );
 
-    virtual bool IsPhrozenConnected() override;
-    virtual bool IsPhrozenStartReceiving() override;
+    virtual bool IsPhrozenConnected();
+    virtual bool IsPhrozenStartReceiving();
 
-    virtual std::string GetPhrozenConnectedMachineIp() override;
+    virtual std::string GetPhrozenConnectedMachineIp();
     
     // Calibration functions
     // Start calibration (async)
-    virtual bool StartCalibration() override;
+    virtual bool StartCalibration();
     
     // Start resonance compensation (async)
-    virtual bool StartResonanceCompensation() override;
+    virtual bool StartResonanceCompensation();
     
     // Start temperature calibration (async)
-    virtual bool StartTemperatureCalibration() override;
+    virtual bool StartTemperatureCalibration();
     
     // Get calibration status (returns int: 0=STOPPED, 1=RUNNING, 2=COMPLETED, 3=ERROR)
-    virtual int GetCalibrationStatus() override;
-    virtual int GetResonanceCompensationStatus() override;
-    virtual int GetTemperatureCalibrationStatus() override;
+    virtual int GetCalibrationStatus();
+    virtual int GetResonanceCompensationStatus();
+    virtual int GetTemperatureCalibrationStatus();
     
     // Get calibration progress (0-100)
-    virtual float GetCalibrationProgress() override;
-    virtual float GetResonanceCompensationProgress() override;
-    virtual float GetTemperatureCalibrationProgress() override;
+    virtual float GetCalibrationProgress();
+    virtual float GetResonanceCompensationProgress();
+    virtual float GetTemperatureCalibrationProgress();
     
     // Check if any calibration is running
-    virtual bool IsAnyCalibrationRunning() override;
+    virtual bool IsAnyCalibrationRunning();
 
     // link to console page by local webside
-    virtual std::string GetConsolePageHyperlink() override;
+    virtual std::string GetConsolePageHyperlink();
 };
 #pragma endregion
 

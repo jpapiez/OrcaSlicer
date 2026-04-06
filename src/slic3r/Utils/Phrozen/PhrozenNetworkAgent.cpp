@@ -33,6 +33,11 @@ namespace MonitorControl {
 
 using namespace Slic3r;
 
+// WebSocket API requires curl >= 7.86.0
+#include <curl/curlver.h>
+#define PHROZEN_HAS_CURL_WS (LIBCURL_VERSION_MINOR >= 86 || LIBCURL_VERSION_MAJOR >= 8)
+
+#if PHROZEN_HAS_CURL_WS
 #pragma region PhrozenFrameProcessor
 // ============================================
 // ReceiveResponse() Processing Modules
@@ -86,6 +91,7 @@ struct PhrozenFrameProcessor {
     }
 };
 #pragma endregion
+#endif // PHROZEN_HAS_CURL_WS
 
 #pragma region CalibrationProgressCalculator
 // Calibration progress calculator module
@@ -1292,7 +1298,9 @@ void PhrozenNetworkAgent::CleanupWebSocketConnection()
     if ( m_pCurlMainWebsocket != nullptr) {
         //close websocket while it linking.
         size_t sent;
+#if PHROZEN_HAS_CURL_WS
         curl_ws_send(m_pCurlMainWebsocket, "", 0, &sent, 0, CURLWS_CLOSE);
+#endif
         
         //release memory
         curl_easy_cleanup(m_pCurlMainWebsocket);
@@ -1749,7 +1757,12 @@ CURLcode PhrozenNetworkAgent::send_action_Command( std::string send_payload )
         if (connectTime > 0)
         {
             size_t sent;
+#if PHROZEN_HAS_CURL_WS
             result = curl_ws_send(m_pCurlMainWebsocket, send_payload.c_str(), strlen(send_payload.c_str()), &sent, 0, CURLWS_TEXT);
+#else
+            BOOST_LOG_TRIVIAL(warning) << "PhrozenNetworkAgent: WebSocket send unavailable (curl < 7.86)";
+            result = CURLE_NOT_BUILT_IN;
+#endif
         }
         //curl_easy_cleanup(curl);
     }

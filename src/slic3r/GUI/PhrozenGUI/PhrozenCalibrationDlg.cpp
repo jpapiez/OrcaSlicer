@@ -320,7 +320,8 @@ int PhrozenCalibrationDlg::ShowModal()
 void PhrozenCalibrationDlg::SyncAndUpdateMachineStatus()
 {
     // Get PhrozenMachineObject instance
-    PhrozenMachineObject* obj = wxGetApp().GetPhrozenMachineObject();
+    // TODO: GetPhrozenMachineObject not yet ported
+    PhrozenMachineObject* obj = nullptr; // wxGetApp().GetPhrozenMachineObject();
     if (!obj) {
         // If object is null, just reset UI
         SetAutoLevelingProgress(0);
@@ -498,7 +499,8 @@ void PhrozenCalibrationDlg::SendCommandToMachine( const ECalibType& eType )
     m_spSend_command_thread = std::make_unique<boost::thread>(
         Slic3r::create_thread([this, eType] {
             // Get PhrozenMachineObject instance
-            PhrozenMachineObject* obj = wxGetApp().GetPhrozenMachineObject();
+            // TODO: GetPhrozenMachineObject not yet ported
+            PhrozenMachineObject* obj = nullptr; // wxGetApp().GetPhrozenMachineObject();
             if (!obj) {
                 BOOST_LOG_TRIVIAL(warning) << "PhrozenCalibrationDlg::SendCommandToMachine: PhrozenMachineObject is null";
                 CallAfter([this]() {
@@ -552,7 +554,8 @@ void PhrozenCalibrationDlg::OnTimer( wxTimerEvent& event )
     }
 
     // Get PhrozenMachineObject instance
-    PhrozenMachineObject* obj = wxGetApp().GetPhrozenMachineObject();
+    // TODO: GetPhrozenMachineObject not yet ported
+    PhrozenMachineObject* obj = nullptr; // wxGetApp().GetPhrozenMachineObject();
     if (!obj) {
         // If object is null, stop timer and reset state
         m_eCurrentProcessingCalib = ECalibType::None;
