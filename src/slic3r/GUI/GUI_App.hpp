@@ -706,7 +706,11 @@ public:
     std::string     get_latest_network_version() const;
     bool            has_network_update_available() const;
 
+    // Phrozen integration
+    bool            IsPhrozenDeveloperMode() const { return m_bPhrozenDeveloperMode; }
+
 private:
+    bool            m_bPhrozenDeveloperMode{ false };
     int             updating_bambu_networking();
     bool            on_init_inner();
     void            copy_network_if_available();

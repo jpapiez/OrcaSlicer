@@ -376,6 +376,9 @@ public:
     Plater*               m_plater { nullptr };
     //BBS: GUI refactor
     MonitorPanel*         m_monitor{ nullptr };
+    // Phrozen integration
+    class PhrozenMonitorPanel;
+    PhrozenMonitorPanel*  m_PhrozenMonitor{ nullptr };
 
     //AuxiliaryPanel*       m_auxiliary{ nullptr };
     MultiMachinePage*     m_multi_machine{ nullptr };

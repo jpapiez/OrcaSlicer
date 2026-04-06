@@ -538,6 +538,9 @@ VendorType PresetBundle::get_current_vendor_type()
         
         if(vendor_name.compare("Qidi") == 0)
             t = VendorType::Klipper_Qidi;
+        
+        if(vendor_name.compare("Phrozen") == 0)
+            t = VendorType::Klipper_Phrozen;
     }
     return t;
 }
