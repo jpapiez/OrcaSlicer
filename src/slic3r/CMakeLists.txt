@@ -544,11 +544,33 @@ set(SLIC3R_GUI_SOURCES
     GUI/Widgets/TabCtrl.hpp
     GUI/Widgets/TempInput.cpp
     GUI/Widgets/TempInput.hpp
+    GUI/Widgets/PhrozenTempInput.cpp
+    GUI/Widgets/PhrozenTempInput.hpp
     GUI/Widgets/TextInput.cpp
     GUI/Widgets/TextInput.hpp
     GUI/Widgets/WebView.cpp
     GUI/Widgets/WebView.hpp
     GUI/WipeTowerDialog.cpp
+    GUI/PhrozenGUI/PhrozenBrowserDialog.cpp
+    GUI/PhrozenGUI/PhrozenBrowserDialog.hpp
+    GUI/PhrozenGUI/PhrozenCalibrationDlg.cpp
+    GUI/PhrozenGUI/PhrozenCalibrationDlg.hpp
+    GUI/PhrozenGUI/PhrozenDeviceManager.cpp
+    GUI/PhrozenGUI/PhrozenDeviceManager.hpp
+    GUI/PhrozenGUI/PhrozenFilamentControl.cpp
+    GUI/PhrozenGUI/PhrozenFilamentControl.hpp
+    GUI/PhrozenGUI/PhrozenMonitor.cpp
+    GUI/PhrozenGUI/PhrozenMonitor.hpp
+    GUI/PhrozenGUI/PhrozenMonitorController.cpp
+    GUI/PhrozenGUI/PhrozenMonitorController.hpp
+    GUI/PhrozenGUI/PhrozenSelectMachine.cpp
+    GUI/PhrozenGUI/PhrozenSelectMachine.hpp
+    GUI/PhrozenGUI/PhrozenSelectMachinePopup.cpp
+    GUI/PhrozenGUI/PhrozenSelectMachinePopup.hpp
+    GUI/PhrozenGUI/PhrozenSideTools.cpp
+    GUI/PhrozenGUI/PhrozenSideTools.hpp
+    GUI/PhrozenGUI/PhrozenStatusPanel.cpp
+    GUI/PhrozenGUI/PhrozenStatusPanel.hpp
     GUI/wxExtensions.cpp
     GUI/wxExtensions.hpp
     pchheader.cpp
@@ -620,6 +642,12 @@ set(SLIC3R_GUI_SOURCES
     Utils/BBLNetworkPlugin.hpp
     Utils/Obico.cpp
     Utils/Obico.hpp
+    Utils/Phrozen/PhrozenMachineDatas.cpp
+    Utils/Phrozen/PhrozenMachineDatas.hpp
+    Utils/Phrozen/PhrozenNetworkAgent.cpp
+    Utils/Phrozen/PhrozenNetworkAgent.hpp
+    Utils/PhrozenConnect.cpp
+    Utils/PhrozenConnect.hpp
     Utils/OctoPrint.cpp
     Utils/OctoPrint.hpp
     Utils/PresetUpdater.cpp
