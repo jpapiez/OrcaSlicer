@@ -1,6 +1,9 @@
 #include "PhrozenStatusPanel.hpp"
 
 #include "../DeviceCore/DevManager.h"
+#include "../DeviceCore/DevPrintTaskInfo.h"
+#include "../DeviceCore/DevFan.h"
+#include "../DeviceCore/DevLamp.h"
 #include "../I18N.hpp"
 #include "../Widgets/Label.hpp"
 #include "../Widgets/Button.hpp"
@@ -43,9 +46,10 @@ namespace Slic3r { namespace GUI {
 
 // Helper to safely downcast MachineObject* to PhrozenMachineObject*.
 // PhrozenStatusPanel's obj member is MachineObject*, but in Phrozen mode
-// it's actually a PhrozenMachineObject. This helper makes the cast explicit.
+// MachineObject is not polymorphic, so use static_cast.
+// Callers must ensure obj is actually a PhrozenMachineObject.
 static inline PhrozenMachineObject* as_phrozen(MachineObject* obj) {
-    return dynamic_cast<PhrozenMachineObject*>(obj);
+    return static_cast<PhrozenMachineObject*>(obj);
 }
 
 #pragma region PanelParameter
@@ -2669,13 +2673,15 @@ PhrozenStatusPanel::PhrozenStatusPanel(wxWindow* parent, wxWindowID id, const wx
     Bind(EVT_FAN_CHANGED, &PhrozenStatusPanel::on_fan_changed, this);
     Bind(EVT_SECONDARY_CHECK_DONE, &PhrozenStatusPanel::on_print_error_done, this);
     Bind(EVT_SECONDARY_CHECK_RESUME, &PhrozenStatusPanel::on_subtask_pause_resume, this);
-    Bind(EVT_PRINT_ERROR_STOP, &PhrozenStatusPanel::on_subtask_abort, this);
-    Bind(EVT_JUMP_TO_LIVEVIEW, [this](wxCommandEvent& e) {
-        assert( 0 );
-        //m_media_play_ctrl->jump_to_play();
-        //if (m_print_error_dlg)
-        //    m_print_error_dlg->on_hide();
-    });
+    // TODO: Phrozen-specific event
+    // Bind(EVT_PRINT_ERROR_STOP, &PhrozenStatusPanel::on_subtask_abort, this);
+    // TODO: Phrozen-specific event
+    // Bind(EVT_JUMP_TO_LIVEVIEW, [this](wxCommandEvent& e) {
+    //     assert( 0 );
+    //     //m_media_play_ctrl->jump_to_play();
+    //     //if (m_print_error_dlg)
+    //     //    m_print_error_dlg->on_hide();
+    // });
 
     m_calibration_btn->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PhrozenStatusPanel::on_start_calibration), NULL, this);
 
@@ -3074,7 +3080,8 @@ void PhrozenStatusPanel::update(MachineObject *obj)
     update_fan_cooling_speed_ctrl(obj);
     update_z_offset_ctrl(obj);
     update_webcam_lighting_status( obj );
-    update_console_hyperlink( obj->GetConsolePageHyperlink() );
+    // TODO: Phrozen-specific method
+    // update_console_hyperlink( obj->GetConsolePageHyperlink() );
     
     start_webcam_update_timer();
 
@@ -3206,7 +3213,7 @@ void PhrozenStatusPanel::start_webcam_update_timer()
 
     m_spWebCam_refresh_timer->SetOwner(this);
     m_spWebCam_refresh_timer->Start(REFRESH_WEBCAM_UI_INTERVAL);
-    wxPostEvent(this, wxTimerEvent());
+    wxPostEvent(this, wxTimerEvent(*m_spWebCam_refresh_timer));
 }
 
 void PhrozenStatusPanel::stop_webcam_update_timer()
@@ -3363,23 +3370,23 @@ void PhrozenStatusPanel::show_error_message(MachineObject *obj, bool is_exist, w
             wxString error_code_msg = wxString::Format("%S\n[%S %S]", msg, print_error_str, show_time);
 
             if (m_print_error_dlg_no_action == nullptr) {
-                m_print_error_dlg_no_action = new SecondaryCheckDialog(this->GetParent(), wxID_ANY, _L("Warning"), SecondaryCheckDialog::ButtonStyle::ONLY_CONFIRM);
+                m_print_error_dlg_no_action = new SecondaryCheckDialog(this->GetParent(), wxID_ANY, _L("Warning"), SecondaryCheckDialog::ONLY_CONFIRM);
             }
 
             if (it_done != phrozen_message_containing_done.end() && it_retry != phrozen_message_containing_retry.end()) {
-                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::ButtonStyle::DONE_AND_RETRY, this);
+                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::DONE_AND_RETRY, this);
             }
             else if (it_done != phrozen_message_containing_done.end()) {
-                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::ButtonStyle::CONFIRM_AND_DONE, this);
+                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::CONFIRM_AND_DONE, this);
             }
             else if (it_retry != phrozen_message_containing_retry.end()) {
-                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::ButtonStyle::CONFIRM_AND_RETRY, this);
+                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::CONFIRM_AND_RETRY, this);
             }
             else if (it_resume != phrozen_message_containing_resume.end()) {
-                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::ButtonStyle::CONFIRM_AND_RESUME, this);
+                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::CONFIRM_AND_RESUME, this);
             }
             else {
-                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::ButtonStyle::ONLY_CONFIRM, this);
+                m_print_error_dlg_no_action->update_title_style(_L("Warning"), SecondaryCheckDialog::ONLY_CONFIRM, this);
             }
             m_print_error_dlg_no_action->update_text(error_code_msg);
             m_print_error_dlg_no_action->Bind(EVT_SECONDARY_CHECK_CONFIRM, [this, obj](wxCommandEvent& e) {
@@ -3409,10 +3416,12 @@ void PhrozenStatusPanel::update_error_message()
             std::string print_error_str = std::string(buf);
             if (print_error_str.size() > 4) { print_error_str.insert(4, " "); }
 
-            wxString error_msg;
-            bool is_errocode_exist = wxGetApp().get_hms_query()->query_print_error_msg(obj->print_error, error_msg);
+            wxString error_msg = wxGetApp().get_hms_query()->query_print_error_msg(obj, obj->print_error);
+            bool is_errocode_exist = !error_msg.IsEmpty();
             std::vector<int> used_button;
-            wxString error_image_url = wxGetApp().get_hms_query()->query_print_error_url_action(obj->print_error, obj->get_dev_id(), used_button);
+            // TODO: Phrozen-specific method
+            // wxString error_image_url = wxGetApp().get_hms_query()->query_print_error_url_action(obj->print_error, obj->get_dev_id(), used_button);
+            wxString error_image_url;
             // special case
             if (print_error_str == "0300 8003" || print_error_str == "0300 8002" || print_error_str == "0300 800A") {
                 used_button.emplace_back(PrintErrorDialog::PrintErrorButton::JUMP_TO_LIVEVIEW);
@@ -4768,154 +4777,11 @@ void PhrozenStatusPanel::update_thumbnail(MachineObject *obj)
     }
     
     // ============================================
-    // 檢查緩存：如果已經有相同的縮略圖，直接使用
+    // TODO: Phrozen-specific thumbnail cache not yet ported
+    // (m_cached_gcode_name and m_thumbnail_cache not available on MachineObject)
+    // For now, show placeholder when we have a gcode name but no cache.
     // ============================================
-    std::cout << "[PhrozenStatusPanel] update_thumbnail: Checking cache, cached_gcode_name = \""
-              << obj->m_cached_gcode_name << "\", gcode_name = \"" << gcode_name 
-              << "\", cache_size = " << obj->m_thumbnail_cache.size() << std::endl;
-    BOOST_LOG_TRIVIAL(debug) << "update_thumbnail: Checking cache - cached_gcode_name=\"" 
-                             << obj->m_cached_gcode_name << "\", gcode_name=\"" << gcode_name 
-                             << "\", cache_size=" << obj->m_thumbnail_cache.size();
-    
-    if (gcode_name == obj->m_cached_gcode_name) {
-        std::cout << "[PhrozenStatusPanel] update_thumbnail: Cache match found, checking cache entry..." << std::endl;
-        auto cache_it = obj->m_thumbnail_cache.find(gcode_name);
-        if (cache_it != obj->m_thumbnail_cache.end() && cache_it->second.IsOk()) {
-            std::cout << "[PhrozenStatusPanel] update_thumbnail_path: Cache hit! Using cached thumbnail" << std::endl;
-            // 緩存命中：直接使用緩存的縮略圖
-            try {
-                wxSize thumbnail_size = m_project_task_panel->get_bitmap_thumbnail()->GetSize();
-                std::cout << "[PhrozenStatusPanel] update_thumbnail: Target thumbnail size = "
-                          << thumbnail_size.x << "x" << thumbnail_size.y << std::endl;
-                
-                if (thumbnail_size.x > 0 && thumbnail_size.y > 0) {
-                    // 從緩存獲取原始縮略圖
-                    wxBitmap cached_bmp = cache_it->second;
-                    wxImage cached_img = cached_bmp.ConvertToImage();
-                    
-                    if (cached_img.IsOk()) {
-                        wxImage display_img = cached_img;
-                        
-                        // 記錄原始尺寸和目標尺寸，用於診斷
-                        int orig_width = cached_img.GetWidth();
-                        int orig_height = cached_img.GetHeight();
-                        std::cout << "[PhrozenStatusPanel] update_thumbnail: Cached thumbnail size = "
-                                  << orig_width << "x" << orig_height << ", target = "
-                                  << thumbnail_size.x << "x" << thumbnail_size.y << std::endl;
-                        
-                        BOOST_LOG_TRIVIAL(info) << "PhrozenStatusPanel::update_thumbnail: "
-                                                << "Cached thumbnail original size: " << orig_width << "x" << orig_height
-                                                << ", target size: " << thumbnail_size.x << "x" << thumbnail_size.y;
-                        
-                        // 檢查是否需要縮放
-                        // 如果原始圖片尺寸與控件尺寸相同，直接使用原始圖片
-                        // 否則使用改進的超採樣技術：根據原始圖片大小動態調整策略
-                        if (orig_width != thumbnail_size.x || orig_height != thumbnail_size.y) {
-                            std::cout << "[PhrozenStatusPanel] update_thumbnail: Scaling cached thumbnail from "
-                                      << orig_width << "x" << orig_height << " to "
-                                      << thumbnail_size.x << "x" << thumbnail_size.y 
-                                      << " (using improved supersampling)" << std::endl;
-                            
-                            // 改進的超採樣策略：
-                            // 如果原始圖片比目標大，使用更大的超採樣因子（3x 或 4x）
-                            // 這樣可以更好地保留細節
-                            float scale_ratio_x = float(orig_width) / float(thumbnail_size.x);
-                            float scale_ratio_y = float(orig_height) / float(thumbnail_size.y);
-                            float scale_ratio = std::max(scale_ratio_x, scale_ratio_y);
-                            
-                            int supersample_factor = 2;
-                            if (scale_ratio > 1.5f) {
-                                // 原始圖片明顯大於目標，使用更大的超採樣因子
-                                supersample_factor = 3;
-                            }
-                            if (scale_ratio > 2.0f) {
-                                // 原始圖片遠大於目標，使用最大超採樣因子
-                                supersample_factor = 4;
-                            }
-                            
-                            int intermediate_width = thumbnail_size.x * supersample_factor;
-                            int intermediate_height = thumbnail_size.y * supersample_factor;
-                            
-                            std::cout << "[PhrozenStatusPanel] update_thumbnail: Using supersample factor "
-                                      << supersample_factor << " (scale ratio: " << scale_ratio << ")" << std::endl;
-                            
-                            // 使用 ResampleBicubic 進行更高質量的縮放（類似 GLTexture 中的方法）
-                            // ResampleBicubic 提供比 Scale 更好的質量，特別適合縮小操作
-                            // 第一步：放大到中間尺寸（使用雙三次插值）
-                            wxImage intermediate_img = cached_img.ResampleBicubic(
-                                intermediate_width, 
-                                intermediate_height
-                            );
-                            
-                            // 第二步：縮小到目標尺寸（使用雙三次插值）
-                            display_img = intermediate_img.ResampleBicubic(
-                                thumbnail_size.x, 
-                                thumbnail_size.y
-                            );
-                            
-                            BOOST_LOG_TRIVIAL(info) << "PhrozenStatusPanel::update_thumbnail: "
-                                                     << "Rescaled cached thumbnail from "
-                                                     << orig_width << "x" << orig_height
-                                                     << " to " << thumbnail_size.x << "x" << thumbnail_size.y;
-                        } else {
-                            std::cout << "[PhrozenStatusPanel] update_thumbnail: Using original cached thumbnail size (exact match)" << std::endl;
-                            BOOST_LOG_TRIVIAL(debug) << "PhrozenStatusPanel::update_thumbnail: "
-                                                     << "Using original cached thumbnail size (exact match)";
-                        }
-                        
-                        // 直接傳入 wxImage
-                        m_project_task_panel->set_thumbnail_img(display_img);
-                        // 設置亮度值（用於暗色模式顯示）
-                        m_project_task_panel->set_brightness_value(get_brightness_value(display_img));
-                        
-                        std::cout << "[PhrozenStatusPanel] update_thumbnail: Successfully updated UI with cached thumbnail" << std::endl;
-                        BOOST_LOG_TRIVIAL(debug) << "PhrozenStatusPanel::update_thumbnail: "
-                                                 << "Using cached thumbnail for GCode: \"" << gcode_name << "\"";
-                        return;  // 成功使用緩存，直接返回
-                    } else {
-                        std::cout << "[PhrozenStatusPanel] update_thumbnail: WARNING - Cached image is not OK: \""
-                                  << gcode_name << "\", displaying broken image" << std::endl;
-                        BOOST_LOG_TRIVIAL(warning) << "PhrozenStatusPanel::update_thumbnail_path: "
-                                                 << "Failed to convert bitmap to image for GCode: \""
-                                                 << gcode_name << "\", displaying broken image";
-                        m_project_task_panel->set_thumbnail_img(m_thumbnail_brokenimg.bmp());
-                    }
-                } else {
-                    // 縮略圖控件尺寸無效：記錄錯誤
-                    std::cout << "[PhrozenStatusPanel] update_thumbnail: ERROR - Invalid thumbnail size: "
-                              << thumbnail_size.x << "x" << thumbnail_size.y << ", GCode: \"" << gcode_name << "\"" << std::endl;
-                    BOOST_LOG_TRIVIAL(warning) << "PhrozenStatusPanel::update_thumbnail_path: "
-                                             << "Invalid thumbnail size: " << thumbnail_size.x
-                                             << "x" << thumbnail_size.y
-                                             << ", GCode: \"" << gcode_name << "\"";
-                    m_project_task_panel->set_thumbnail_img(m_thumbnail_brokenimg.bmp());
-                }
-            } catch (const std::exception& e) {
-                std::cout << "[PhrozenStatusPanel] update_thumbnail: EXCEPTION while using cached thumbnail: "
-                          << e.what() << std::endl;
-                BOOST_LOG_TRIVIAL(warning) << "PhrozenStatusPanel::update_thumbnail: "
-                                           << "Exception while using cached thumbnail: " << e.what()
-                                           << ", will fetch new thumbnail";
-                // 緩存使用失敗，繼續獲取新的縮略圖
-            }
-        } else {
-            std::cout << "[PhrozenStatusPanel] update_thumbnail: Cache entry not found or invalid" << std::endl;
-        }
-    } else {
-        std::cout << "[PhrozenStatusPanel] update_thumbnail: Cache miss (different GCode name)" << std::endl;
-        // Check if cache actually has the gcode_name but m_cached_gcode_name is empty
-        auto cache_it = obj->m_thumbnail_cache.find(gcode_name);
-        if (cache_it != obj->m_thumbnail_cache.end()) {
-            std::cout << "[PhrozenStatusPanel] update_thumbnail: WARNING - Cache HAS entry for gcode_name=\"" 
-                      << gcode_name << "\" but m_cached_gcode_name is empty!" << std::endl;
-            BOOST_LOG_TRIVIAL(warning) << "update_thumbnail: WARNING - Cache HAS entry for gcode_name=\"" 
-                                       << gcode_name << "\" but m_cached_gcode_name is empty!";
-        } else {
-            std::cout << "[PhrozenStatusPanel] update_thumbnail: Cache does NOT have entry for gcode_name=\"" 
-                      << gcode_name << "\"" << std::endl;
-        }
-        m_project_task_panel->set_thumbnail_img(m_project_task_panel->get_bitmap_thumbnail_placeholder().bmp());
-    }
+    m_project_task_panel->set_thumbnail_img(m_project_task_panel->get_bitmap_thumbnail_placeholder().bmp());
     
     std::cout << "[PhrozenStatusPanel] update_thumbnail: Function completed for GCode=\"" << gcode_name << "\"" << std::endl;
 }
@@ -5116,7 +4982,7 @@ void PhrozenStatusPanel::on_axis_ctrl_z_down_10(wxCommandEvent &event)
 void PhrozenStatusPanel::axis_ctrl_e_hint(bool up_down)
 {
     if (ctrl_e_hint_dlg == nullptr) {
-        ctrl_e_hint_dlg = new SecondaryCheckDialog(this->GetParent(), wxID_ANY, _L("Warning"), SecondaryCheckDialog::ButtonStyle::CONFIRM_AND_CANCEL, wxDefaultPosition, wxDefaultSize, wxCLOSE_BOX | wxCAPTION, true);
+        ctrl_e_hint_dlg = new SecondaryCheckDialog(this->GetParent(), wxID_ANY, _L("Warning"), SecondaryCheckDialog::CONFIRM_AND_CANCEL, wxDefaultPosition, wxDefaultSize, wxCLOSE_BOX | wxCAPTION, true);
         ctrl_e_hint_dlg->update_text(_L("Please heat the nozzle to above 170°C before loading or unloading filament."));
         ctrl_e_hint_dlg->show_again_config_text = std::string("not_show_ectrl_hint");
     }
@@ -5207,17 +5073,17 @@ void PhrozenStatusPanel::on_fan_changed(wxCommandEvent& event)
     auto type = event.GetInt();
     auto speed = atoi(event.GetString().c_str());
 
-    if (type == MachineObject::FanType::COOLING_FAN) {
+    if (type == DevFan::FanType::COOLING_FAN) {
         set_hold_count(this->m_switch_nozzle_fan_timeout);
         m_switch_nozzle_fan->SetValue(speed > 0 ? true : false);
         m_switch_nozzle_fan->setFanValue(speed * 10);
     }
-    else if (type == MachineObject::FanType::BIG_COOLING_FAN) {
+    else if (type == DevFan::FanType::BIG_COOLING_FAN) {
         set_hold_count(this->m_switch_printing_fan_timeout);
         m_switch_printing_fan->SetValue(speed > 0 ? true : false);
         m_switch_printing_fan->setFanValue(speed * 10);
     }
-    else if (type == MachineObject::FanType::CHAMBER_FAN) {
+    else if (type == DevFan::FanType::CHAMBER_FAN) {
         set_hold_count(this->m_switch_cham_fan_timeout);
         m_switch_cham_fan->SetValue(speed > 0 ? true : false);
         m_switch_cham_fan->setFanValue(speed * 10);
@@ -5265,7 +5131,7 @@ void PhrozenStatusPanel::on_switch_speed(wxCommandEvent &event)
     // default speed lvl
     int selected_item = 1;
     if (obj) {
-        int speed_lvl_idx = obj->printing_speed_lvl - 1;
+        int speed_lvl_idx = obj->GetPrintingSpeedLevel() - 1;
         if (speed_lvl_idx >= 0 && speed_lvl_idx < 4) {
             selected_item = speed_lvl_idx;
         }
@@ -5281,7 +5147,7 @@ void PhrozenStatusPanel::on_switch_speed(wxCommandEvent &event)
         this->speed_lvl        = e.GetInt() + 1;
         if (obj) {
             set_hold_count(this->speed_lvl_timeout);
-            obj->command_set_printing_speed((PrintingSpeedLevel)this->speed_lvl);
+            obj->command_set_printing_speed((DevPrintingSpeedLevel)this->speed_lvl);
         }
     });
     popUp->Bind(wxEVT_SHOW, [this, popUp](auto &e) {
@@ -5347,11 +5213,11 @@ void PhrozenStatusPanel::on_lamp_switch(wxCommandEvent &event)
         m_switch_lamp->SetValue(true);
         // do not update when timeout > 0
         set_hold_count(this->m_switch_lamp_timeout);
-        obj->command_set_chamber_light(MachineObject::LIGHT_EFFECT::LIGHT_EFFECT_ON);
+        obj->GetLamp()->CtrlSetChamberLight(DevLamp::LIGHT_EFFECT_ON);
     } else {
         m_switch_lamp->SetValue(false);
         set_hold_count(this->m_switch_lamp_timeout);
-        obj->command_set_chamber_light(MachineObject::LIGHT_EFFECT::LIGHT_EFFECT_OFF);
+        obj->GetLamp()->CtrlSetChamberLight(DevLamp::LIGHT_EFFECT_OFF);
     }
 }
 

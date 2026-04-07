@@ -353,7 +353,7 @@ public:
     void SetMachineObject( MachineObject* pObj ) { obj = pObj; }
     MachineObject* obj{nullptr};
     // Convenience accessor: returns obj as PhrozenMachineObject* via dynamic_cast
-    PhrozenMachineObject* phrozen_obj() const { return dynamic_cast<PhrozenMachineObject*>(obj); }
+    PhrozenMachineObject* phrozen_obj() const { return static_cast<PhrozenMachineObject*>(obj); }
 
     void SetPhrozenMachineObject( PhrozenMachineObject_Dev* pObj ) { m_pMachineObj = pObj; }
     PhrozenMachineObject_Dev* PhrozenObj() { return m_pMachineObj; }

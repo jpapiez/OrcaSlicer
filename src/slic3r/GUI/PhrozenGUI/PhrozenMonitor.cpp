@@ -92,13 +92,13 @@ PhrozenMonitorPanel::~PhrozenMonitorPanel()
     m_refresh_timer = new wxTimer();
     m_refresh_timer->SetOwner(this);
     m_refresh_timer->Start(REFRESH_INTERVAL);
-    wxPostEvent(this, wxTimerEvent());
+    wxPostEvent(this, wxTimerEvent(*m_refresh_timer));
 
     Slic3r::DeviceManager* dev = Slic3r::GUI::wxGetApp().getDeviceManager();
     if (!dev) return;
     MachineObject *obj_ = dev->get_selected_machine();
     if (obj_)
-        GUI::wxGetApp().sidebar().load_ams_list(obj_->get_dev_id(), obj_);
+        GUI::wxGetApp().sidebar().load_ams_list(obj_);
 }
 
   void PhrozenMonitorPanel::init_tabpanel()
@@ -129,7 +129,7 @@ void PhrozenMonitorPanel::set_default()
     /* reset status panel*/
     m_status_info_panel->set_default();
 
-    wxGetApp().sidebar().load_ams_list({}, {});
+    wxGetApp().sidebar().load_ams_list(nullptr);
 }
 
 void PhrozenMonitorPanel::on_sys_color_changed()
@@ -289,7 +289,7 @@ bool PhrozenMonitorPanel::Show(bool show)
         m_refresh_timer->Stop();
         m_refresh_timer->SetOwner(this);
         m_refresh_timer->Start(REFRESH_INTERVAL);
-        wxPostEvent(this, wxTimerEvent());
+        wxPostEvent(this, wxTimerEvent(*m_refresh_timer));
 
         if ( m_status_info_panel ){
             m_status_info_panel->start_webcam_update_timer();
@@ -339,7 +339,8 @@ Thaw();
 void PhrozenMonitorPanel::OnConnectMachineByIp( wxCommandEvent& event )
 {
     std::string strConnectedIp;
-    Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
+    // TODO: Phrozen-specific method
+    // Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
 
     if ( event.GetString().IsEmpty() ) return;
 
@@ -369,7 +370,8 @@ void PhrozenMonitorPanel::OnDisconnectMachine( wxCommandEvent& event )
     // Reset time information when disconnecting machine
     m_status_info_panel->reset_time_information();
 
-    wxGetApp().ProcessPhrozenDisconnect();
+    // TODO: Phrozen-specific method
+    // wxGetApp().ProcessPhrozenDisconnect();
 
     start_update();
 }

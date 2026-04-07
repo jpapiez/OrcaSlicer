@@ -39,6 +39,8 @@ wxDEFINE_EVENT(EVT_PRINT_JOB_CANCEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_CLEAR_IPADDRESS, wxCommandEvent);
 
 #define PHROZEN_WRAP_GAP FromDIP(2)
+#define MATERIAL_ITEM_SIZE wxSize(FromDIP(65), FromDIP(50))
+#define MATERIAL_ITEM_REAL_SIZE wxSize(FromDIP(62), FromDIP(32))
 
 static wxString task_canceled_text = _L("Task canceled");
 
@@ -1621,7 +1623,8 @@ void PhrozenSelectMachineDialog::show_status(PhrozenPrintDialogStatus status, st
                 //}
             }
 
-            auto target_print_name = wxString(obj_->get_preset_printer_model_name(target_model_id));
+            // TODO: Phrozen-specific method - get_preset_printer_model_name does not exist on MachineObject
+            auto target_print_name = wxString(target_model_id);
             target_print_name.Replace(wxT("Bambu Lab "), wxEmptyString);
             msg_text = wxString::Format(_L("The selected printer (%s) is incompatible with the chosen printer profile in the slicer (%s)."), sourcet_print_name, target_print_name);
             
@@ -1696,7 +1699,8 @@ void PhrozenSelectMachineDialog::on_cancel(wxCloseEvent &event)
 
     // Clear flag when dialog is closed (user cancels or closes)
     if (m_plater) {
-        m_plater->set_skip_apply_for_phrozen_print(false);
+        // TODO: Phrozen-specific API not available in OrcaSlicer
+        // m_plater->set_skip_apply_for_phrozen_print(false);
     }
 
     this->EndModal(wxID_CANCEL);
@@ -1722,11 +1726,13 @@ bool PhrozenSelectMachineDialog::is_blocking_printing(MachineObject* obj_)
     }
 
     if (source_model != target_model) {
-        std::vector<std::string> compatible_machine = dev->get_compatible_machine(target_model);
-        vector<std::string>::iterator it = find(compatible_machine.begin(), compatible_machine.end(), source_model);
-        if (it == compatible_machine.end()) {
-            return true;
-        }
+        // TODO: get_compatible_machine not available in OrcaSlicer DeviceManager
+        // std::vector<std::string> compatible_machine = dev->get_compatible_machine(target_model);
+        // vector<std::string>::iterator it = find(compatible_machine.begin(), compatible_machine.end(), source_model);
+        // if (it == compatible_machine.end()) {
+        //     return true;
+        // }
+        return true; // default: block if models differ
     }
 
     return false;
@@ -1755,7 +1761,7 @@ bool PhrozenSelectMachineDialog::is_same_nozzle_diameters(float &tag_nozzle_diam
 
     try
     {
-        auto extruders = wxGetApp().plater()->get_partplate_list().get_curr_plate()->get_used_extruders();
+        auto extruders = wxGetApp().plater()->get_partplate_list().get_curr_plate()->get_extruders();
         for (auto i = 0; i < extruders.size(); i++) {
             auto extruder = extruders[i] - 1;
             tag_nozzle_diameter = float(opt_nozzle_diameters->get_at(extruder));
@@ -2138,7 +2144,9 @@ void PhrozenSelectMachineDialog::on_send_print()
     this->Hide();
     bool bSuccessSend = false;
     try {
-        bSuccessSend = m_plater->send_gcode_legacy(PLATE_CURRENT_IDX, nullptr, use_3mf, target_print_host);
+        // TODO: OrcaSlicer send_gcode_legacy returns void and takes 3 args (no target_print_host)
+        m_plater->send_gcode_legacy(PLATE_CURRENT_IDX, nullptr, use_3mf);
+        bSuccessSend = true;
     } catch (...) {
         BOOST_LOG_TRIVIAL(error) << "Exception occurred in send_gcode_legacy()";
     }
@@ -2153,34 +2161,35 @@ void PhrozenSelectMachineDialog::on_send_print()
         }
 
         wxBusyCursor kWait;
-        //確認送印成功，要同步連接device page的ip connect
-        bool bConnectDevice = true;
-        if ( wxGetApp().IsConnectingMachine() )
-        {
-            std::string strCurrentConnectedIp;
-            wxGetApp().GetCurrentConnectedMachineIp( strCurrentConnectedIp );
-            if ( strCurrentConnectedIp == m_printer_last_select_ip )
-            {
-                bConnectDevice = false;
-            }
-            else
-            {
-                wxGetApp().ProcessPhrozenDisconnect();
-                std::this_thread::sleep_for(std::chrono::seconds(1));// wait for process end
-            }
-        }
-        
-        if ( bConnectDevice )
-        {
-            wxGetApp().InitPhrozenConnector(m_printer_last_select_ip);
-            wxGetApp().ProcessPhrozenConnector();
-        }
+        // TODO: Phrozen-specific connector APIs not available in OrcaSlicer
+        // bool bConnectDevice = true;
+        // if ( wxGetApp().IsConnectingMachine() )
+        // {
+        //     std::string strCurrentConnectedIp;
+        //     wxGetApp().GetCurrentConnectedMachineIp( strCurrentConnectedIp );
+        //     if ( strCurrentConnectedIp == m_printer_last_select_ip )
+        //     {
+        //         bConnectDevice = false;
+        //     }
+        //     else
+        //     {
+        //         wxGetApp().ProcessPhrozenDisconnect();
+        //         std::this_thread::sleep_for(std::chrono::seconds(1));
+        //     }
+        // }
+        //
+        // if ( bConnectDevice )
+        // {
+        //     wxGetApp().InitPhrozenConnector(m_printer_last_select_ip);
+        //     wxGetApp().ProcessPhrozenConnector();
+        // }
     }
 
     BOOST_LOG_TRIVIAL(info) << "print_job: start print job";
 
     if (m_plater) {
-        m_plater->set_skip_apply_for_phrozen_print(false);
+        // TODO: Phrozen-specific API not available in OrcaSlicer
+        // m_plater->set_skip_apply_for_phrozen_print(false);
     }
     
     // 7. 關閉對話框，將控制權還給主畫面（無論成功或取消）
@@ -2409,8 +2418,8 @@ void PhrozenSelectMachineDialog::on_keyin(wxCommandEvent &event)
 
     auto fnTestConnect = [&]( std::string strIp ) -> bool
     {
-        //test printer connect
-        bool bSuccess = wxGetApp().TestIsIpConnectValid( strIp );
+        // TODO: TestIsIpConnectValid not available in OrcaSlicer GUI_App
+        bool bSuccess = false; // wxGetApp().TestIsIpConnectValid( strIp );
         if ( !bSuccess )
         {
             const wxString text = _L("Failed to connect to printer.");
@@ -2492,7 +2501,8 @@ void PhrozenSelectMachineDialog::update_user_printer()
 
     wxBusyCursor kWaiting; // set mouse cursor show busy ico
     std::unordered_map< std::string, std::string > kResult;
-    SearchPhrozenPrinter( kResult );
+    // TODO: SearchPhrozenPrinter not available in OrcaSlicer
+    // SearchPhrozenPrinter( kResult );
     for ( auto& item : kResult )
     {
         machine_list_ip.push_back( item.first );
@@ -3121,7 +3131,7 @@ void PhrozenSelectMachineDialog::reset_and_sync_ams_list()
     }
 
     
-    auto           extruders = wxGetApp().plater()->get_partplate_list().get_curr_plate()->get_used_extruders();
+    auto           extruders = wxGetApp().plater()->get_partplate_list().get_curr_plate()->get_extruders();
     BitmapCache    bmcache;
     auto iter = m_materialList.begin();
     while (iter != m_materialList.end()) {
@@ -3490,7 +3500,7 @@ void PhrozenSelectMachineDialog::update_lan_machine_list()
 {
     DeviceManager* dev = wxGetApp().getDeviceManager();
     if (!dev) return;
-   auto  m_free_machine_list = dev->get_local_machine_list();
+   auto  m_free_machine_list = dev->get_local_machinelist();
 
     BOOST_LOG_TRIVIAL(trace) << "SelectMachinePopup update_other_devices start";
 

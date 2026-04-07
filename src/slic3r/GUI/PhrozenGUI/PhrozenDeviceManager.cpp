@@ -31,12 +31,12 @@ namespace Slic3r {
 
 #pragma region PhrozenMachineObject
 PhrozenMachineObject::PhrozenMachineObject( std::string name, std::string id, std::string ip )
-    : MachineObject( nullptr, name, id, ip )
+    : MachineObject( nullptr, nullptr, name, id, ip )
 {
 }
 
 PhrozenMachineObject::PhrozenMachineObject( std::string ip )
-    : MachineObject( nullptr, "", "", ip )
+    : MachineObject( nullptr, nullptr, "", "", ip )
 {
 
 }
@@ -100,6 +100,12 @@ int PhrozenMachineObject::GetPhrozenNozzleTemperature_limit()
 {
     //todo get from machine?
     return 300;
+}
+
+int PhrozenMachineObject::GetPhrozenCoolingPower_limit()
+{
+    // TODO: get from machine? Fan power percentage limit (0-100)
+    return 100;
 }
 
 std::string PhrozenMachineObject::GetPhrozenPrintStatus()
@@ -827,7 +833,7 @@ bool PhrozenMachineObject::IsPhrozenStartReceiving()
 
 std::string PhrozenMachineObject::GetPhrozenConnectedMachineIp()
 {
-    return dev_ip;
+    return get_dev_ip();
 }
 
 // Calibration functions implementation
@@ -1003,8 +1009,8 @@ bool PhrozenMachineObject::IsAnyCalibrationRunning()
 
 std::string PhrozenMachineObject::GetConsolePageHyperlink()
 {
-    if ( dev_ip.empty() ) return "";
-    return dev_ip + ":8808";
+    if ( get_dev_ip().empty() ) return "";
+    return get_dev_ip() + ":8808";
 }
 
 #pragma endregion 

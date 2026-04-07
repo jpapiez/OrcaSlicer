@@ -32,6 +32,7 @@ public:
 
     virtual int GetPhrozenBedTemperature_limit();
     virtual int GetPhrozenNozzleTemperature_limit();
+    virtual int GetPhrozenCoolingPower_limit();
     // print states
     virtual std::string GetPhrozenPrintStatus();
     virtual std::string GetPhrozenPrintFile();
