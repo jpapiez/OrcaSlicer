@@ -1623,9 +1623,7 @@ void PhrozenSelectMachineDialog::show_status(PhrozenPrintDialogStatus status, st
                 //}
             }
 
-            // TODO: Phrozen-specific method - get_preset_printer_model_name does not exist on MachineObject
-            auto target_print_name = wxString(target_model_id);
-            target_print_name.Replace(wxT("Bambu Lab "), wxEmptyString);
+            auto target_print_name = MachineObject::get_preset_printer_model_name(target_model_id);
             msg_text = wxString::Format(_L("The selected printer (%s) is incompatible with the chosen printer profile in the slicer (%s)."), sourcet_print_name, target_print_name);
             
             update_print_status_msg(msg_text, true, true);
@@ -1699,8 +1697,7 @@ void PhrozenSelectMachineDialog::on_cancel(wxCloseEvent &event)
 
     // Clear flag when dialog is closed (user cancels or closes)
     if (m_plater) {
-        // TODO: Phrozen-specific API not available in OrcaSlicer
-        // m_plater->set_skip_apply_for_phrozen_print(false);
+        m_plater->set_skip_apply_for_phrozen_print(false);
     }
 
     this->EndModal(wxID_CANCEL);
@@ -1726,13 +1723,11 @@ bool PhrozenSelectMachineDialog::is_blocking_printing(MachineObject* obj_)
     }
 
     if (source_model != target_model) {
-        // TODO: get_compatible_machine not available in OrcaSlicer DeviceManager
-        // std::vector<std::string> compatible_machine = dev->get_compatible_machine(target_model);
-        // vector<std::string>::iterator it = find(compatible_machine.begin(), compatible_machine.end(), source_model);
-        // if (it == compatible_machine.end()) {
-        //     return true;
-        // }
-        return true; // default: block if models differ
+        std::vector<std::string> compatible_machine = DeviceManager::get_compatible_machine(target_model);
+        vector<std::string>::iterator it = find(compatible_machine.begin(), compatible_machine.end(), source_model);
+        if (it == compatible_machine.end()) {
+            return true;
+        }
     }
 
     return false;
@@ -2161,35 +2156,33 @@ void PhrozenSelectMachineDialog::on_send_print()
         }
 
         wxBusyCursor kWait;
-        // TODO: Phrozen-specific connector APIs not available in OrcaSlicer
-        // bool bConnectDevice = true;
-        // if ( wxGetApp().IsConnectingMachine() )
-        // {
-        //     std::string strCurrentConnectedIp;
-        //     wxGetApp().GetCurrentConnectedMachineIp( strCurrentConnectedIp );
-        //     if ( strCurrentConnectedIp == m_printer_last_select_ip )
-        //     {
-        //         bConnectDevice = false;
-        //     }
-        //     else
-        //     {
-        //         wxGetApp().ProcessPhrozenDisconnect();
-        //         std::this_thread::sleep_for(std::chrono::seconds(1));
-        //     }
-        // }
-        //
-        // if ( bConnectDevice )
-        // {
-        //     wxGetApp().InitPhrozenConnector(m_printer_last_select_ip);
-        //     wxGetApp().ProcessPhrozenConnector();
-        // }
+        bool bConnectDevice = true;
+        if ( wxGetApp().IsConnectingMachine() )
+        {
+            std::string strCurrentConnectedIp;
+            wxGetApp().GetCurrentConnectedMachineIp( strCurrentConnectedIp );
+            if ( strCurrentConnectedIp == m_printer_last_select_ip )
+            {
+                bConnectDevice = false;
+            }
+            else
+            {
+                wxGetApp().ProcessPhrozenDisconnect();
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+        }
+
+        if ( bConnectDevice )
+        {
+            wxGetApp().InitPhrozenConnector(m_printer_last_select_ip);
+            wxGetApp().ProcessPhrozenConnector();
+        }
     }
 
     BOOST_LOG_TRIVIAL(info) << "print_job: start print job";
 
     if (m_plater) {
-        // TODO: Phrozen-specific API not available in OrcaSlicer
-        // m_plater->set_skip_apply_for_phrozen_print(false);
+        m_plater->set_skip_apply_for_phrozen_print(false);
     }
     
     // 7. 關閉對話框，將控制權還給主畫面（無論成功或取消）
@@ -2341,9 +2334,7 @@ void PhrozenSelectMachineDialog::on_send_print()
         BOOST_LOG_TRIVIAL(error) << "build_nozzle_info errors";
     }
 
-    // TODO: Phrozen-specific MachineObject method not yet ported
-    // m_print_job->has_sdcard = obj_->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_NORMAL;
-    m_print_job->has_sdcard = !obj_->is_sdcard_printing(); // approximate: assume SD card present if not in SD print
+    m_print_job->has_sdcard = obj_->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_NORMAL;
 
 
     bool timelapse_option = false;
@@ -2418,8 +2409,7 @@ void PhrozenSelectMachineDialog::on_keyin(wxCommandEvent &event)
 
     auto fnTestConnect = [&]( std::string strIp ) -> bool
     {
-        // TODO: TestIsIpConnectValid not available in OrcaSlicer GUI_App
-        bool bSuccess = false; // wxGetApp().TestIsIpConnectValid( strIp );
+        bool bSuccess = wxGetApp().TestIsIpConnectValid( strIp );
         if ( !bSuccess )
         {
             const wxString text = _L("Failed to connect to printer.");
@@ -2501,8 +2491,7 @@ void PhrozenSelectMachineDialog::update_user_printer()
 
     wxBusyCursor kWaiting; // set mouse cursor show busy ico
     std::unordered_map< std::string, std::string > kResult;
-    // TODO: SearchPhrozenPrinter not available in OrcaSlicer
-    // SearchPhrozenPrinter( kResult );
+    wxGetApp().SearchPhrozenPrinter( kResult );
     for ( auto& item : kResult )
     {
         machine_list_ip.push_back( item.first );
@@ -2812,19 +2801,17 @@ void PhrozenSelectMachineDialog::update_show_status()
         show_status(PhrozenPrintDialogStatus::PrintStatusInPrinting);
         return;
     }
-    // TODO: Phrozen-specific MachineObject method not yet ported (get_sdcard_state / SdcardState)
-    // else if (!obj_->is_support_print_without_sd && (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD)) {
-    //     show_status(PhrozenPrintDialogStatus::PrintStatusNoSdcard);
-    //     return;
-    // }
+    else if (!obj_->is_support_print_without_sd && (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD)) {
+        show_status(PhrozenPrintDialogStatus::PrintStatusNoSdcard);
+        return;
+    }
 
     // check sdcard when if lan mode printer
     if (obj_->is_lan_mode_printer()) {
-        // TODO: Phrozen-specific MachineObject method not yet ported (get_sdcard_state / SdcardState)
-        // if (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD) {
-        //     show_status(PhrozenPrintDialogStatus::PrintStatusLanModeNoSdcard);
-        //     return;
-        // }
+        if (obj_->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD) {
+            show_status(PhrozenPrintDialogStatus::PrintStatusLanModeNoSdcard);
+            return;
+        }
     }
 
     // no ams

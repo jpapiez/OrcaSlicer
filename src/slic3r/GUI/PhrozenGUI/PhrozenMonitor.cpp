@@ -204,35 +204,33 @@ void PhrozenMonitorPanel::update_all()
     if (m_status_info_panel->IsShown() && MonitorControl::IsStartReceiving() ) 
     {
         show_status(MONITOR_NORMAL);
-        // TODO: GetPhrozenDeviceManager not yet ported
-        // auto pManager = wxGetApp().GetPhrozenDeviceManager();
-        // if ( pManager )
-        // {
-        //     auto pMachineObj = pManager->GetConnectingMachine();
-        //     if ( pMachineObj )
-        //     {
-        //         m_side_tools->set_current_printer_name( pMachineObj->GetMachineIp() );
-        //         m_status_info_panel->SetPhrozenMachineObject( pMachineObj );
-        //         auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
-        //         m_status_info_panel->SetMachineObject( pPhrozenMachineObj );
-        //         m_status_info_panel->update( pPhrozenMachineObj );
-        //     }
-        //     else
-        //     {
-        //         //TODO reset and disable ui
-        //     }
-        // }
+        auto pManager = wxGetApp().GetPhrozenDeviceManager();
+        if ( pManager )
+        {
+            auto pMachineObj = pManager->GetConnectingMachine();
+            if ( pMachineObj )
+            {
+                m_side_tools->set_current_printer_name( pMachineObj->GetMachineIp() );
+                m_status_info_panel->SetPhrozenMachineObject( pMachineObj );
+                auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
+                m_status_info_panel->SetMachineObject( pPhrozenMachineObj );
+                m_status_info_panel->update( pPhrozenMachineObj );
+            }
+            else
+            {
+                //TODO reset and disable ui
+            }
+        }
 
     }
     else
     {
-        // TODO: GetPhrozenMachineObject not yet ported
-        // auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
-        // if ( pPhrozenMachineObj && m_last_status == MONITOR_NORMAL )
-        // {   
-        //     wxCommandEvent disconnectEvent;
-        //     OnDisconnectMachine( disconnectEvent );
-        // }
+        auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
+        if ( pPhrozenMachineObj && m_last_status == MONITOR_NORMAL )
+        {   
+            wxCommandEvent disconnectEvent;
+            OnDisconnectMachine( disconnectEvent );
+        }
         m_side_tools->set_none_printer_mode();
         show_status(MONITOR_UNKNOWN);
     }
@@ -339,8 +337,7 @@ Thaw();
 void PhrozenMonitorPanel::OnConnectMachineByIp( wxCommandEvent& event )
 {
     std::string strConnectedIp;
-    // TODO: Phrozen-specific method
-    // Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
+    Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
 
     if ( event.GetString().IsEmpty() ) return;
 
@@ -370,8 +367,7 @@ void PhrozenMonitorPanel::OnDisconnectMachine( wxCommandEvent& event )
     // Reset time information when disconnecting machine
     m_status_info_panel->reset_time_information();
 
-    // TODO: Phrozen-specific method
-    // wxGetApp().ProcessPhrozenDisconnect();
+    wxGetApp().ProcessPhrozenDisconnect();
 
     start_update();
 }

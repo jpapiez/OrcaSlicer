@@ -846,9 +846,8 @@ wxSizer* PhrozenFilamentControl::create_nozzle_image( wxWindow* pParent )
 
 void PhrozenFilamentControl::OnUnloadAllButtonClicked( wxMouseEvent &WXUNUSED(evt))
 {
-    // TODO: GetPhrozenMachineObject not yet ported
-    // auto pObject = Slic3r::GUI::wxGetApp().GetPhrozenMachineObject();
-    // if ( pObject ) pObject->SetPhrozenCommand_unload_all_slots();
+    auto pObject = Slic3r::GUI::wxGetApp().GetPhrozenMachineObject();
+    if ( pObject ) pObject->SetPhrozenCommand_unload_all_slots();
 }
 
 void PhrozenFilamentControl::msw_rescale()

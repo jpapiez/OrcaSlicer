@@ -1809,14 +1809,12 @@ void PhrozenStatusBasePanel::on_ams_unload_all(wxCommandEvent& WXUNUSED(event))
 {
     try {
     #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
     #endif
         if (obj) {
-            // TODO: Phrozen-specific MachineObject method not yet ported
-            // obj->SetPhrozenCommand_unload_all_slots();
+            obj->SetPhrozenCommand_unload_all_slots();
         }
     } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "on_ams_unload_all: Exception occurred: " << e.what();
@@ -1839,14 +1837,12 @@ void PhrozenStatusBasePanel::on_ams_unload_single_slot(wxCommandEvent& WXUNUSED(
     
     try {
     #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
     #endif
         if (obj) {
-            // TODO: Phrozen-specific MachineObject method not yet ported
-            // obj->SetPhrozenCommand_unload(nSlotId);
+            obj->SetPhrozenCommand_unload(nSlotId);
         }
     } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "on_ams_unload_single_slot: Exception occurred: " << e.what();
@@ -1869,14 +1865,12 @@ void PhrozenStatusBasePanel::on_ams_load_single_slot(wxCommandEvent& WXUNUSED(ev
     
     try {
     #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
     #endif
         if (obj) {
-            // TODO: Phrozen-specific MachineObject method not yet ported
-            // obj->SetPhrozenCommand_load(nSlotId);
+            obj->SetPhrozenCommand_load(nSlotId);
         }
     } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "on_ams_load_single_slot: Exception occurred: " << e.what();
@@ -2508,16 +2502,14 @@ void PhrozenStatusPanel::update_camera_state(MachineObject* obj)
 
     // m_bitmap_sdcard_abnormal_img->SetToolTip(_L("SD Card Abnormal"));
     // sdcard
-    // TODO: Phrozen-specific MachineObject method not yet ported
-    // get_sdcard_state() and SdcardState are not available in OrcaSlicer's MachineObject
-    // if (m_last_sdcard != (int) obj->get_sdcard_state()) {
-    //     if (obj->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD) {
-    //     } else if (obj->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_NORMAL) {
-    //     } else if (obj->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_ABNORMAL) {
-    //     } else {
-    //     }
-    //     m_last_sdcard = (int) obj->get_sdcard_state();
-    // }
+    if (m_last_sdcard != (int) obj->get_sdcard_state()) {
+        if (obj->get_sdcard_state() == MachineObject::SdcardState::NO_SDCARD) {
+        } else if (obj->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_NORMAL) {
+        } else if (obj->get_sdcard_state() == MachineObject::SdcardState::HAS_SDCARD_ABNORMAL) {
+        } else {
+        }
+        m_last_sdcard = (int) obj->get_sdcard_state();
+    }
 
     // recording
     if (m_last_recording != (obj->is_recording() ? 1 : 0)) {
@@ -2673,15 +2665,13 @@ PhrozenStatusPanel::PhrozenStatusPanel(wxWindow* parent, wxWindowID id, const wx
     Bind(EVT_FAN_CHANGED, &PhrozenStatusPanel::on_fan_changed, this);
     Bind(EVT_SECONDARY_CHECK_DONE, &PhrozenStatusPanel::on_print_error_done, this);
     Bind(EVT_SECONDARY_CHECK_RESUME, &PhrozenStatusPanel::on_subtask_pause_resume, this);
-    // TODO: Phrozen-specific event
-    // Bind(EVT_PRINT_ERROR_STOP, &PhrozenStatusPanel::on_subtask_abort, this);
-    // TODO: Phrozen-specific event
-    // Bind(EVT_JUMP_TO_LIVEVIEW, [this](wxCommandEvent& e) {
-    //     assert( 0 );
-    //     //m_media_play_ctrl->jump_to_play();
-    //     //if (m_print_error_dlg)
-    //     //    m_print_error_dlg->on_hide();
-    // });
+    Bind(EVT_PRINT_ERROR_STOP, &PhrozenStatusPanel::on_subtask_abort, this);
+    Bind(EVT_JUMP_TO_LIVEVIEW, [this](wxCommandEvent& e) {
+        assert( 0 );
+        //m_media_play_ctrl->jump_to_play();
+        //if (m_print_error_dlg)
+        //    m_print_error_dlg->on_hide();
+    });
 
     m_calibration_btn->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PhrozenStatusPanel::on_start_calibration), NULL, this);
 
@@ -2808,10 +2798,9 @@ void PhrozenStatusPanel::on_subtask_pause_resume(wxCommandEvent &event)
     // 防呆檢查：確保物件有效
     // ============================================
 #ifdef __APPLE__
-    // TODO: GetPhrozenMachineObject not yet ported
-    // if (!obj){
-    //     obj = wxGetApp().GetPhrozenMachineObject();
-    // }
+    if (!obj){
+        obj = wxGetApp().GetPhrozenMachineObject();
+    }
 #endif
     if (!obj) {
         BOOST_LOG_TRIVIAL(warning) << "PhrozenStatusPanel::on_subtask_pause_resume: obj is nullptr, operation ignored";
@@ -2821,10 +2810,7 @@ void PhrozenStatusPanel::on_subtask_pause_resume(wxCommandEvent &event)
     // ============================================
     // 獲取當前列印狀態並執行對應操作
     // ============================================
-    // TODO: Phrozen-specific MachineObject methods not yet ported
-    // IsPrintPaused, SetPhrozenCommand_resume, SetPhrozenCommand_pause
-    // bool is_paused = obj->IsPrintPaused();
-    bool is_paused = false;
+    bool is_paused = obj->IsPrintPaused();
     
     if (is_paused) {
         // ============================================
@@ -2833,9 +2819,7 @@ void PhrozenStatusPanel::on_subtask_pause_resume(wxCommandEvent &event)
         BOOST_LOG_TRIVIAL(info) << "PhrozenStatusPanel::on_subtask_pause_resume: "
                                 << "Resuming print task, dev_id=" << obj->get_dev_id();
         
-        // TODO: Phrozen-specific MachineObject method not yet ported
-        // bool result = obj->SetPhrozenCommand_resume();
-        bool result = false;
+        bool result = obj->SetPhrozenCommand_resume();
         if (!result) {
             BOOST_LOG_TRIVIAL(error) << "PhrozenStatusPanel::on_subtask_pause_resume: "
                                      << "Failed to execute resume command, dev_id=" << obj->get_dev_id();
@@ -2848,9 +2832,7 @@ void PhrozenStatusPanel::on_subtask_pause_resume(wxCommandEvent &event)
         BOOST_LOG_TRIVIAL(info) << "PhrozenStatusPanel::on_subtask_pause_resume: "
                                 << "Pausing print task, dev_id=" << obj->get_dev_id();
         
-        // TODO: Phrozen-specific MachineObject method not yet ported
-        // bool result = obj->SetPhrozenCommand_pause();
-        bool result = false;
+        bool result = obj->SetPhrozenCommand_pause();
         if (!result) {
             BOOST_LOG_TRIVIAL(error) << "PhrozenStatusPanel::on_subtask_pause_resume: "
                                      << "Failed to execute pause command, dev_id=" << obj->get_dev_id();
@@ -2930,10 +2912,9 @@ void PhrozenStatusPanel::on_subtask_abort(wxCommandEvent &event)
             // 5. 防禦性編程：即使對話框是模態的，這個檢查也能防止潛在的崩潰
             // 6. 與其他代碼保持一致：代碼庫中其他類似回調（如 show_error_message）也檢查 obj
 #ifdef __APPLE__
-            // TODO: GetPhrozenMachineObject not yet ported
-            // if (!obj){
-            //     obj = wxGetApp().GetPhrozenMachineObject();
-            // }
+            if (!obj){
+                obj = wxGetApp().GetPhrozenMachineObject();
+            }
 #endif
             if (!obj) {
                 BOOST_LOG_TRIVIAL(warning) << "PhrozenStatusPanel::on_subtask_abort: "
@@ -2951,9 +2932,7 @@ void PhrozenStatusPanel::on_subtask_abort(wxCommandEvent &event)
             // 1. 錯誤處理：如果命令執行失敗，需要記錄錯誤日誌以便調試
             // 2. 用戶反饋：雖然這裡沒有直接顯示錯誤給用戶，但日誌可以幫助後續改進
             // 3. 狀態追蹤：了解命令執行成功率，有助於發現系統問題
-            // TODO: Phrozen-specific MachineObject method not yet ported
-            // bool result = obj->SetPhrozenCommand_abort();
-            bool result = false;
+            bool result = obj->SetPhrozenCommand_abort();
             if (!result) {
                 BOOST_LOG_TRIVIAL(error) << "PhrozenStatusPanel::on_subtask_abort: "
                                          << "Failed to execute abort command, dev_id=" << obj->get_dev_id();
@@ -3080,8 +3059,7 @@ void PhrozenStatusPanel::update(MachineObject *obj)
     update_fan_cooling_speed_ctrl(obj);
     update_z_offset_ctrl(obj);
     update_webcam_lighting_status( obj );
-    // TODO: Phrozen-specific method
-    // update_console_hyperlink( obj->GetConsolePageHyperlink() );
+    update_console_hyperlink( obj->GetConsolePageHyperlink() );
     
     start_webcam_update_timer();
 
@@ -3252,15 +3230,14 @@ void PhrozenStatusPanel::on_camera_button_triggered( wxCommandEvent& event )
     PhrozenStatusBasePanel::on_camera_button_triggered( event );
 
     // 2. 根據新狀態同步背景取流
-    // TODO: GetPhrozenDeviceManager not yet ported
-    // auto* mgr = wxGetApp().GetPhrozenDeviceManager();
-    // if ( !mgr || !mgr->IsMachineConnecting() ) return;
-    //
-    // if ( IsWebcamUiEnabled() ) {
-    //     mgr->StartReceiveWebcam();
-    // } else {
-    //     mgr->StopReceiveWebcamAsync();
-    // }
+    auto* mgr = wxGetApp().GetPhrozenDeviceManager();
+    if ( !mgr || !mgr->IsMachineConnecting() ) return;
+
+    if ( IsWebcamUiEnabled() ) {
+        mgr->StartReceiveWebcam();
+    } else {
+        mgr->StopReceiveWebcamAsync();
+    }
 }
 
 void PhrozenStatusPanel::on_lighting_button_triggered( wxCommandEvent& event )
@@ -3269,10 +3246,9 @@ void PhrozenStatusPanel::on_lighting_button_triggered( wxCommandEvent& event )
 
     if ( MonitorControl::IsStartReceiving() )
     {
-        // TODO: GetPhrozenMachineObject not yet ported
-        // auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
-        // if ( !pPhrozenMachineObj ) return;
-        // pPhrozenMachineObj->SetPhrozenCommand_lighting_enabled( IsLightingUiEnabled() );
+        auto pPhrozenMachineObj = wxGetApp().GetPhrozenMachineObject();
+        if ( !pPhrozenMachineObj ) return;
+        pPhrozenMachineObj->SetPhrozenCommand_lighting_enabled( IsLightingUiEnabled() );
         set_hold_count( m_lighting_state_timeout );
     }
 }
@@ -5679,19 +5655,17 @@ void PhrozenStatusPanel::on_set_nozzle_temp()
     long nozzle_temp = m_spTemp_nozzle_ctrl->GetValue();
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
             set_hold_count(m_temp_nozzle_timeout);
             
-            // TODO: Phrozen-specific MachineObject methods not yet ported
-            // if (nozzle_temp > obj->GetPhrozenNozzleTemperature_limit()) {
-            //     nozzle_temp = obj->GetPhrozenNozzleTemperature_limit();
-            // }
-            // obj->SetPhrozenCommand_nozzle_temp(nozzle_temp);
+            if (nozzle_temp > obj->GetPhrozenNozzleTemperature_limit()) {
+                nozzle_temp = obj->GetPhrozenNozzleTemperature_limit();
+            }
+            obj->SetPhrozenCommand_nozzle_temp(nozzle_temp);
         }
     } catch (...) {
         ;
@@ -5721,20 +5695,18 @@ void PhrozenStatusPanel::on_set_bed_temp()
     long bed_temp = m_spTemp_heatedBed_ctrl->GetValue();
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
             set_hold_count(m_temp_bed_timeout);
-            // TODO: Phrozen-specific MachineObject methods not yet ported
-            // int limit = obj->GetPhrozenBedTemperature_limit();
-            // if (bed_temp >= limit) {
-            //     BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
-            //     bed_temp = limit;
-            // }
-            // obj->SetPhrozenCommand_bed_temp(bed_temp);
+            int limit = obj->GetPhrozenBedTemperature_limit();
+            if (bed_temp >= limit) {
+                BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
+                bed_temp = limit;
+            }
+            obj->SetPhrozenCommand_bed_temp(bed_temp);
         }
     } catch (...) {
         ;
@@ -5766,20 +5738,18 @@ void PhrozenStatusPanel::on_set_cooling_auxiliary()
     long bed_temp = m_spCooling_auxiliary_ctrl->GetValue();
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
             set_hold_count(m_cooling_auxiliary_timeout);
-            // TODO: Phrozen-specific MachineObject methods not yet ported
-            // int limit = obj->GetPhrozenCoolingPower_limit();
-            // if (bed_temp >= limit) {
-            //     BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
-            //     bed_temp = limit;
-            // }
-            // obj->SetPhrozenCommand_cooling_auxiliary(bed_temp);
+            int limit = obj->GetPhrozenCoolingPower_limit();
+            if (bed_temp >= limit) {
+                BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
+                bed_temp = limit;
+            }
+            obj->SetPhrozenCommand_cooling_auxiliary(bed_temp);
         }
     } catch (...) {
         ;
@@ -5791,20 +5761,18 @@ void PhrozenStatusPanel::on_set_cooling_part()
     long bed_temp = m_spCooling_part_ctrl->GetValue();
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
             set_hold_count(m_cooling_part_timeout);
-            // TODO: Phrozen-specific MachineObject methods not yet ported
-            // int limit = obj->GetPhrozenCoolingPower_limit();
-            // if (bed_temp >= limit) {
-            //     BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
-            //     bed_temp = limit;
-            // }
-            // obj->SetPhrozenCommand_cooling_part(bed_temp);
+            int limit = obj->GetPhrozenCoolingPower_limit();
+            if (bed_temp >= limit) {
+                BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
+                bed_temp = limit;
+            }
+            obj->SetPhrozenCommand_cooling_part(bed_temp);
         }
     } catch (...) {
         ;
@@ -5816,20 +5784,18 @@ void PhrozenStatusPanel::on_set_cooling_shield()
     long bed_temp = m_spCooling_shield_ctrl->GetValue();
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
             set_hold_count(m_cooling_shield_timeout);
-            // TODO: Phrozen-specific MachineObject methods not yet ported
-            // int limit = obj->GetPhrozenCoolingPower_limit();
-            // if (bed_temp >= limit) {
-            //     BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
-            //     bed_temp = limit;
-            // }
-            // obj->SetPhrozenCommand_cooling_shield(bed_temp);
+            int limit = obj->GetPhrozenCoolingPower_limit();
+            if (bed_temp >= limit) {
+                BOOST_LOG_TRIVIAL(info) << "can not set over limit = " << limit << ", set temp = " << bed_temp;
+                bed_temp = limit;
+            }
+            obj->SetPhrozenCommand_cooling_shield(bed_temp);
         }
     } catch (...) {
         ;
@@ -5840,15 +5806,13 @@ void PhrozenStatusPanel::on_print_speed_changed( PhrozenPrintSpeed eLevel )
 {
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
             set_hold_count(m_print_speed_timeout);
-            // TODO: Phrozen-specific MachineObject method not yet ported
-            // obj->SetPhrozenCommand_print_speed( print_speed_enum_to_percent( eLevel ) );
+            obj->SetPhrozenCommand_print_speed( print_speed_enum_to_percent( eLevel ) );
         }
     } catch (...) {
         ;
@@ -5908,15 +5872,12 @@ void PhrozenStatusPanel::on_manual_movement_changed( PhrozenMovement eMoveType )
 {
     try {
 #ifdef __APPLE__
-        // TODO: GetPhrozenMachineObject not yet ported
-        // if (!obj){
-        //     obj = wxGetApp().GetPhrozenMachineObject();
-        // }
+        if (!obj){
+            obj = wxGetApp().GetPhrozenMachineObject();
+        }
 #endif
         if (obj) {
              float fMoveRange = 0.0f;
-            // TODO: Phrozen-specific MachineObject methods not yet ported
-            // SetPhrozenCommand_nozzle_movement, SetPhrozenCommand_nozzle_offset
             switch( eMoveType )
             {
                 case PhrozenMovement::Nozzle_X_Positive:

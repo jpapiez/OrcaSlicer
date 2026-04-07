@@ -537,14 +537,11 @@ void PhrozenIpConnectDialog::workerConnectThreadFunc(std::string str_ip)
 
     post_update_msg(_L("connecting..."), false);
 
-    // TODO: Phrozen-specific method
-    // m_bSuccess = wxGetApp().InitPhrozenConnector(str_ip);
-    m_bSuccess = false;
+    m_bSuccess = wxGetApp().InitPhrozenConnector(str_ip);
 
     if ( m_bWithoutShowModal && m_bSuccess )
     {
-        // TODO: Phrozen-specific method
-        // wxGetApp().ProcessPhrozenConnector();
+        wxGetApp().ProcessPhrozenConnector();
         return;
     }
 
@@ -553,8 +550,7 @@ void PhrozenIpConnectDialog::workerConnectThreadFunc(std::string str_ip)
         closeCount = 1;
         if ( m_bSuccess )
         {
-            // TODO: Phrozen-specific method
-            // wxGetApp().ProcessPhrozenConnector();
+            wxGetApp().ProcessPhrozenConnector();
             post_update_msg(wxString::Format(_L("Connecting to printer success! The dialog will close later"), closeCount), false);
         }
         else
@@ -789,8 +785,7 @@ void PhrozenMachineObjectPanel::on_mouse_left_up(wxMouseEvent &evt)
     }
 
     std::string strIp;
-    // TODO: Phrozen-specific method
-    // Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strIp );
+    Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strIp );
     bool bIsCurrentConnected = strIp == m_strIp;
 
     if (m_show_bind) {
@@ -993,8 +988,7 @@ void PhrozenSelectMachinePopup::update_history_devices()
     m_scrolledWindow->Freeze();
 
     std::string strConnectedIp;
-    // TODO: Phrozen-specific method
-    // Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
+    Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
     for ( auto pMachineTab : m_history_lan_machine_ip_panels )
     {
         if ( pMachineTab->get_machine_ip() == strConnectedIp )
@@ -1072,8 +1066,7 @@ void PhrozenSelectMachinePopup::on_ip_panel_clicked( wxCommandEvent& event )
 {
     auto strIp = event.GetString().ToStdString();
     std::string strConnectedIp;
-    // TODO: Phrozen-specific method
-    // Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
+    Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
     if ( strIp.empty() || strConnectedIp == strIp )
     {
         return;
@@ -1129,8 +1122,7 @@ void PhrozenSelectMachinePopup::update_lan_devices()
 
         // always add new find.
         std::string strConnectedIp;
-        // TODO: Phrozen-specific method
-        // Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
+        Slic3r::GUI::wxGetApp().GetCurrentConnectedMachineIp( strConnectedIp );
 
         for ( auto kIter : kSearchResult )
         {
