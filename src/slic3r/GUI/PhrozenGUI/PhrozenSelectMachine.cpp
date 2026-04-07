@@ -1,5 +1,6 @@
 #include "PhrozenSelectMachine.hpp"
 #include "../I18N.hpp"
+#include "../DeviceCore/DevExtruderSystem.h"
 
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/Thread.hpp"
@@ -1760,10 +1761,9 @@ bool PhrozenSelectMachineDialog::is_same_nozzle_diameters(float &tag_nozzle_diam
         for (auto i = 0; i < extruders.size(); i++) {
             auto extruder = extruders[i] - 1;
             tag_nozzle_diameter = float(opt_nozzle_diameters->get_at(extruder));
-            // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — nozzle type check intentionally disabled
-            // if (tag_nozzle_diameter != obj_->m_extder_data.extders[0].current_nozzle_diameter) {
-            //     return false;
-            // }
+            if (obj_->GetExtderSystem() && tag_nozzle_diameter != obj_->GetExtderSystem()->GetNozzleDiameter(0)) {
+                return false;
+            }
         }
     }
     catch (const std::exception&)
@@ -1981,9 +1981,9 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
         confirm_text.push_back(ConfirmBeforeSendInfo(_L("There are some unknown filaments in the AMS mappings. Please check whether they are the required filaments. If they are okay, press \"Confirm\" to start printing.")));
     }
 
-    // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — nozzle type/diameter checks intentionally disabled
-    // Nozzle type/diameter checks require PhrozenOrca's ExtderData
-    if (false /* !obj_->m_extder_data.extders[0].current_nozzle_type != ntUndefine */ && (m_print_type == PhrozenPrintFromType::FROM_NORMAL))
+    auto* extder_sys = obj_->GetExtderSystem();
+    auto extder_opt = extder_sys ? extder_sys->GetExtderById(0) : std::nullopt;
+    if (extder_opt && extder_opt->GetNozzleType() != NozzleType::ntUndefine && (m_print_type == PhrozenPrintFromType::FROM_NORMAL))
     {
         float nozzle_diameter = 0;
         if (!is_same_nozzle_diameters(nozzle_diameter))
@@ -1991,7 +1991,7 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
             has_slice_warnings = true;
             
             wxString nozzle_in_preset = wxString::Format(_L("nozzle in preset: %.1f %s"),nozzle_diameter, "");
-            wxString nozzle_in_printer = wxString::Format(_L("nozzle memorized: %.1f %s"), 0.4f /* obj_->m_extder_data.extders[0].current_nozzle_diameter */, "");
+            wxString nozzle_in_printer = wxString::Format(_L("nozzle memorized: %.1f %s"), extder_opt->GetNozzleDiameter(), "");
 
             confirm_text.push_back(ConfirmBeforeSendInfo(_L("Your nozzle diameter in sliced file is not consistent with memorized nozzle. If you changed your nozzle lately, please go to Device > Printer Parts to change settings.") 
                 + "\n    " + nozzle_in_preset 
@@ -2000,14 +2000,13 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
         }
         
         std::string filament_type;
-        // NOTE: m_extder_data not available — is_same_nozzle_type needs PhrozenOrca's Extder (intentionally disabled)
-        // if (!is_same_nozzle_type(obj_->m_extder_data.extders[0], filament_type))
-        // {
-        //     has_slice_warnings = true;
-        //     is_printing_block = true;
-        //     wxString nozzle_in_preset = wxString::Format(_L("Printing high temperature material (%s material) with %s may cause nozzle damage"), filament_type, format_steel_name(obj_->m_extder_data.extders[0].current_nozzle_type));
-        //     confirm_text.push_back(ConfirmBeforeSendInfo(nozzle_in_preset, ConfirmBeforeSendInfo::InfoLevel::Warning));
-        // }
+        if (!is_same_nozzle_type(*extder_opt, filament_type))
+        {
+            has_slice_warnings = true;
+            is_printing_block = true;
+            wxString nozzle_in_preset = wxString::Format(_L("Printing high temperature material (%s material) with %s may cause nozzle damage"), filament_type, format_steel_name(extder_opt->GetNozzleType()));
+            confirm_text.push_back(ConfirmBeforeSendInfo(nozzle_in_preset, ConfirmBeforeSendInfo::InfoLevel::Warning));
+        }
     }
     
 

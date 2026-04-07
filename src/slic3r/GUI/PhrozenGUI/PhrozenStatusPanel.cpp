@@ -3,6 +3,7 @@
 #include "../DeviceCore/DevManager.h"
 #include "../DeviceCore/DevPrintTaskInfo.h"
 #include "../DeviceCore/DevFan.h"
+#include "../DeviceCore/DevExtruderSystem.h"
 #include "../DeviceCore/DevLamp.h"
 #include "../I18N.hpp"
 #include "../Widgets/Label.hpp"
@@ -2553,8 +2554,6 @@ void PhrozenStatusPanel::update_camera_state(MachineObject* obj)
 
 PhrozenStatusPanel::PhrozenStatusPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : PhrozenStatusBasePanel(parent, id, pos, size, style)
-    // NOTE: FanControlPopup not available — OrcaSlicer uses FanControlPopupNew with different API
-    // , m_fan_control_popup(new FanControlPopup(this))
 {
     obj = nullptr;
     m_score_data         = new ScoreData;
@@ -4980,8 +4979,8 @@ void PhrozenStatusPanel::axis_ctrl_e_hint(bool up_down)
 void PhrozenStatusPanel::on_axis_ctrl_e_up_10(wxCommandEvent &event)
 {
     if (obj) {
-        // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — temp check intentionally disabled
-        if (/* obj->m_extder_data.extders[0].temp >= TEMP_THRESHOLD_ALLOW_E_CTRL || */ (wxGetApp().app_config->get("not_show_ectrl_hint") == "1"))
+        // Check extruder temp before allowing E-axis control
+        if (obj->GetExtderSystem()->GetNozzleTempCurrent(0) >= TEMP_THRESHOLD_ALLOW_E_CTRL || (wxGetApp().app_config->get("not_show_ectrl_hint") == "1"))
             obj->command_axis_control("E", 1.0, -10.0f, 900);
         else
             axis_ctrl_e_hint(true);
@@ -4991,8 +4990,8 @@ void PhrozenStatusPanel::on_axis_ctrl_e_up_10(wxCommandEvent &event)
 void PhrozenStatusPanel::on_axis_ctrl_e_down_10(wxCommandEvent &event)
 {
     if (obj) {
-        // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — temp check intentionally disabled
-        if (/* obj->m_extder_data.extders[0].temp >= TEMP_THRESHOLD_ALLOW_E_CTRL || */ (wxGetApp().app_config->get("not_show_ectrl_hint") == "1"))
+        // Check extruder temp before allowing E-axis control
+        if (obj->GetExtderSystem()->GetNozzleTempCurrent(0) >= TEMP_THRESHOLD_ALLOW_E_CTRL || (wxGetApp().app_config->get("not_show_ectrl_hint") == "1"))
             obj->command_axis_control("E", 1.0, 10.0f, 900);
         else
             axis_ctrl_e_hint(false);
@@ -5159,25 +5158,35 @@ void PhrozenStatusPanel::on_printing_fan_switch(wxCommandEvent &event)
 
 void PhrozenStatusPanel::on_nozzle_fan_switch(wxCommandEvent &event)
 {
-    // NOTE: FanControlPopup not available — OrcaSlicer uses FanControlPopupNew with different API
-    // Original PhrozenOrca code used FanControlPopup which is not in OrcaSlicer
-    return;
+    if (m_fan_control_popup) {
+        m_fan_control_popup->Destroy();
+        m_fan_control_popup = nullptr;
+    }
 
+    if (!obj) return;
+    if (obj->GetFan()->GetAirDuctData().modes.empty()) {
+        obj->GetFan()->converse_to_duct(true, obj->GetFan()->GetSupportAuxFanData(), obj->GetFan()->GetSupportChamberFan());
+    }
 
+    m_fan_control_popup = new FanControlPopupNew(this, obj, obj->GetFan()->GetAirDuctData());
 
-    /*if (!obj) return;
+    auto pos = m_switch_nozzle_fan->GetScreenPosition();
+    pos.y = pos.y + m_switch_nozzle_fan->GetSize().y;
 
-    bool value = m_switch_nozzle_fan->GetValue();
+    int display_idx = wxDisplay::GetFromWindow(this);
+    auto display = wxDisplay(display_idx).GetClientArea();
 
-    if (value) {
-        obj->command_control_fan(MachineObject::FanType::COOLING_FAN, true);
-        m_switch_nozzle_fan->SetValue(true);
-        set_hold_count(this->m_switch_nozzle_fan_timeout);
-    } else {
-        obj->command_control_fan(MachineObject::FanType::COOLING_FAN, false);
-        m_switch_nozzle_fan->SetValue(false);
-        set_hold_count(this->m_switch_nozzle_fan_timeout);
-    }*/
+    wxSize screenSize = wxSize(display.GetWidth(), display.GetHeight());
+    wxSize fan_popup_size = m_fan_control_popup->GetSize();
+
+    pos.x -= FromDIP(150);
+    pos.y -= FromDIP(20);
+    if (screenSize.y - fan_popup_size.y < FromDIP(300)) {
+        pos.y = (screenSize.y - fan_popup_size.y) / 2;
+    }
+
+    m_fan_control_popup->SetPosition(pos);
+    m_fan_control_popup->ShowModal();
 }
 void PhrozenStatusPanel::on_lamp_switch(wxCommandEvent &event)
 {
