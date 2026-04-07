@@ -4223,6 +4223,7 @@ struct Plater::priv
 
     SelectMachineDialog* m_select_machine_dlg = nullptr;
     PhrozenSelectMachineDialog* m_phrozen_select_machine_dlg{nullptr};
+    bool m_skip_apply_for_phrozen_print{false};
     SendMultiMachinePage* m_send_multi_dlg = nullptr;
     SendToPrinterDialog* m_send_to_sdcard_dlg = nullptr;
     PublishDialog *m_publish_dlg = nullptr;
@@ -18190,4 +18191,9 @@ wxArrayString get_all_camera_view_type() {
     }
     return all_types;
 }
+void Plater::set_skip_apply_for_phrozen_print(bool skip)
+{
+    p->m_skip_apply_for_phrozen_print = skip;
+}
+
 }}    // namespace Slic3r::GUI

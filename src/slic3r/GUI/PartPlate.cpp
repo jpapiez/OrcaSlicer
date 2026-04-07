@@ -6621,5 +6621,19 @@ void PartPlateList::on_filament_deleted(int filament_count, int filament_id)
     BOOST_LOG_TRIVIAL(info) << boost::format("%1%: filament_count=%2%, filament_id=%3%")% __FUNCTION__ %filament_count %filament_id;
 }
 
+std::vector<int> PartPlate::get_used_extruders() const
+{
+    std::vector<int> used_extruders;
+    if (m_gcode_result) {
+        for (const auto& [id, volume] : m_gcode_result->print_statistics.total_volumes_per_extruder) {
+            used_extruders.push_back(static_cast<int>(id));
+        }
+    }
+    if (used_extruders.empty()) {
+        used_extruders.push_back(1);
+    }
+    return used_extruders;
+}
+
 }//end namespace GUI
 }//end namespace slic3r

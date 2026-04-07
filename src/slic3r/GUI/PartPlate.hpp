@@ -487,6 +487,7 @@ public:
     Print* fff_print() { return m_print; }
     //return the slice result
     GCodeProcessorResult* get_slice_result() { return m_gcode_result; }
+    std::vector<int> get_used_extruders() const;
 
     std::string           get_tmp_gcode_path();
     std::string           get_temp_config_3mf_path();

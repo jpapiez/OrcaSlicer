@@ -618,6 +618,7 @@ public:
     //BBS: add print job releated functions
     void get_print_job_data(PrintPrepareData* data);
     void set_print_job_plate_idx(int plate_idx);
+    void set_skip_apply_for_phrozen_print(bool skip);
 
     int get_send_calibration_finished_event();
     int get_print_finished_event();
