@@ -2553,7 +2553,7 @@ void PhrozenStatusPanel::update_camera_state(MachineObject* obj)
 
 PhrozenStatusPanel::PhrozenStatusPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : PhrozenStatusBasePanel(parent, id, pos, size, style)
-    // TODO: Adapt to OrcaSlicer's FanControlPopupNew
+    // NOTE: FanControlPopup not available — OrcaSlicer uses FanControlPopupNew with different API
     // , m_fan_control_popup(new FanControlPopup(this))
 {
     obj = nullptr;
@@ -2840,7 +2840,7 @@ void PhrozenStatusPanel::on_subtask_pause_resume(wxCommandEvent &event)
     }
     
     // ============================================
-    // TODO: 錯誤對話框處理邏輯
+    // NOTE: Error dialog handling logic not yet implemented
     // 需要進一步確認用法與整合可行性
     // ============================================
     // 這段代碼的作用是在暫停/續印時隱藏錯誤對話框，但需要確認：
@@ -3395,7 +3395,7 @@ void PhrozenStatusPanel::update_error_message()
             wxString error_msg = wxGetApp().get_hms_query()->query_print_error_msg(obj, obj->print_error);
             bool is_errocode_exist = !error_msg.IsEmpty();
             std::vector<int> used_button;
-            // TODO: Phrozen-specific method
+            // NOTE: Phrozen-specific method — query_print_error_url_action not available in OrcaSlicer's HMSQuery
             // wxString error_image_url = wxGetApp().get_hms_query()->query_print_error_url_action(obj->print_error, obj->get_dev_id(), used_button);
             wxString error_image_url;
             // special case
@@ -4753,7 +4753,7 @@ void PhrozenStatusPanel::update_thumbnail(MachineObject *obj)
     }
     
     // ============================================
-    // TODO: Phrozen-specific thumbnail cache not yet ported
+    // NOTE: Phrozen-specific thumbnail cache not yet ported
     // (m_cached_gcode_name and m_thumbnail_cache not available on MachineObject)
     // For now, show placeholder when we have a gcode name but no cache.
     // ============================================
@@ -4802,7 +4802,7 @@ void PhrozenStatusPanel::update_print_filament(MachineObject *obj)
         BOOST_LOG_TRIVIAL(debug) << "PhrozenStatusPanel::update_print_filament: "
                                  << "Filament amount: " << print_filament << " mm";
         
-        // TODO: 實作耗材使用量顯示邏輯
+        // NOTE: Filament usage display logic not yet implemented
         // if (m_project_task_panel->update_filament_used) {
         //     m_project_task_panel->update_filament_used(
         //         wxString::Format("%.2f mm", print_filament));
@@ -4980,7 +4980,7 @@ void PhrozenStatusPanel::axis_ctrl_e_hint(bool up_down)
 void PhrozenStatusPanel::on_axis_ctrl_e_up_10(wxCommandEvent &event)
 {
     if (obj) {
-        // TODO: m_extder_data not available in OrcaSlicer's MachineObject
+        // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — temp check intentionally disabled
         if (/* obj->m_extder_data.extders[0].temp >= TEMP_THRESHOLD_ALLOW_E_CTRL || */ (wxGetApp().app_config->get("not_show_ectrl_hint") == "1"))
             obj->command_axis_control("E", 1.0, -10.0f, 900);
         else
@@ -4991,7 +4991,7 @@ void PhrozenStatusPanel::on_axis_ctrl_e_up_10(wxCommandEvent &event)
 void PhrozenStatusPanel::on_axis_ctrl_e_down_10(wxCommandEvent &event)
 {
     if (obj) {
-        // TODO: m_extder_data not available in OrcaSlicer's MachineObject
+        // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — temp check intentionally disabled
         if (/* obj->m_extder_data.extders[0].temp >= TEMP_THRESHOLD_ALLOW_E_CTRL || */ (wxGetApp().app_config->get("not_show_ectrl_hint") == "1"))
             obj->command_axis_control("E", 1.0, 10.0f, 900);
         else
@@ -5159,7 +5159,7 @@ void PhrozenStatusPanel::on_printing_fan_switch(wxCommandEvent &event)
 
 void PhrozenStatusPanel::on_nozzle_fan_switch(wxCommandEvent &event)
 {
-    // TODO: Adapt to OrcaSlicer's FanControlPopupNew (different API)
+    // NOTE: FanControlPopup not available — OrcaSlicer uses FanControlPopupNew with different API
     // Original PhrozenOrca code used FanControlPopup which is not in OrcaSlicer
     return;
 

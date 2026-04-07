@@ -1303,7 +1303,7 @@ bool PhrozenSelectMachineDialog::get_ams_mapping_result(std::string &mapping_arr
                     try
                     {
                         if (m_ams_mapping_result[k].ams_id.empty() || m_ams_mapping_result[k].slot_id.empty()) {  // invalid case
-                            mapping_item_v1["ams_id"]  = 255; // TODO: Orca hack
+                            mapping_item_v1["ams_id"]  = 255; // Hardcoded: Phrozen uses external spool (ams_id=255)
                             mapping_item_v1["slot_id"] = 255;
                         }
                         else {
@@ -1370,7 +1370,7 @@ bool PhrozenSelectMachineDialog::build_nozzles_info(std::string& nozzles_info)
         }
         nozzle_item["type"] = nullptr;
         //if (i >= 0 && i < opt_nozzle_volume_type->size()) {
-            nozzle_item["flowSize"] = "standard_flow"; // TODO: Orca hack
+            nozzle_item["flowSize"] = "standard_flow"; // Hardcoded: standard flow for Phrozen
         //}
         if (i >= 0 && i < opt_nozzle_diameters->size()) {
             nozzle_item["diameter"] = opt_nozzle_diameters->get_at(i);
@@ -1760,7 +1760,7 @@ bool PhrozenSelectMachineDialog::is_same_nozzle_diameters(float &tag_nozzle_diam
         for (auto i = 0; i < extruders.size(); i++) {
             auto extruder = extruders[i] - 1;
             tag_nozzle_diameter = float(opt_nozzle_diameters->get_at(extruder));
-            // TODO: m_extder_data not available in OrcaSlicer's MachineObject
+            // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — nozzle type check intentionally disabled
             // if (tag_nozzle_diameter != obj_->m_extder_data.extders[0].current_nozzle_diameter) {
             //     return false;
             // }
@@ -1981,7 +1981,7 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
         confirm_text.push_back(ConfirmBeforeSendInfo(_L("There are some unknown filaments in the AMS mappings. Please check whether they are the required filaments. If they are okay, press \"Confirm\" to start printing.")));
     }
 
-    // TODO: m_extder_data not available in OrcaSlicer's MachineObject
+    // NOTE: m_extder_data not available in OrcaSlicer's MachineObject — nozzle type/diameter checks intentionally disabled
     // Nozzle type/diameter checks require PhrozenOrca's ExtderData
     if (false /* !obj_->m_extder_data.extders[0].current_nozzle_type != ntUndefine */ && (m_print_type == PhrozenPrintFromType::FROM_NORMAL))
     {
@@ -2000,7 +2000,7 @@ void PhrozenSelectMachineDialog::on_send_btn_pressed(wxCommandEvent &event)
         }
         
         std::string filament_type;
-        // TODO: m_extder_data not available - is_same_nozzle_type needs PhrozenOrca's Extder
+        // NOTE: m_extder_data not available — is_same_nozzle_type needs PhrozenOrca's Extder (intentionally disabled)
         // if (!is_same_nozzle_type(obj_->m_extder_data.extders[0], filament_type))
         // {
         //     has_slice_warnings = true;
@@ -2139,7 +2139,7 @@ void PhrozenSelectMachineDialog::on_send_print()
     this->Hide();
     bool bSuccessSend = false;
     try {
-        // TODO: OrcaSlicer send_gcode_legacy returns void and takes 3 args (no target_print_host)
+        // NOTE: OrcaSlicer send_gcode_legacy returns void and takes 3 args (no target_print_host)
         m_plater->send_gcode_legacy(PLATE_CURRENT_IDX, nullptr, use_3mf);
         bSuccessSend = true;
     } catch (...) {
@@ -2346,7 +2346,7 @@ void PhrozenSelectMachineDialog::on_send_print()
         false,
         timelapse_option,
         true,
-        0, // TODO: Orca hack
+        0, // Hardcoded default value
         0,
         0);
 

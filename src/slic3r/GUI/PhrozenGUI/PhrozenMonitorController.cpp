@@ -3203,7 +3203,7 @@ void GetAllInfo_websocket()
                     //no need to do repeat execution
                 //   result = send_action_Command(payload_AMS.dump());
                 //}
-                // TODO: Allow duplicate execution until we implement a better mechanism
+                // NOTE: Allow duplicate execution until we implement a better mechanism
                 // Temporarily allow repeated execution until better solution is found
                 const bool allowAux = !m_bSuppressAuxiliaryWebsocketQueries.load(std::memory_order_relaxed);
                 if (allowAux &&

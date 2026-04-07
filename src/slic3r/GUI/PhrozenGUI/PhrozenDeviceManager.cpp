@@ -104,7 +104,7 @@ int PhrozenMachineObject::GetPhrozenNozzleTemperature_limit()
 
 int PhrozenMachineObject::GetPhrozenCoolingPower_limit()
 {
-    // TODO: get from machine? Fan power percentage limit (0-100)
+    // NOTE: Hardcoded fan power percentage limit (0-100), not fetched from machine
     return 100;
 }
 

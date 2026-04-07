@@ -492,7 +492,7 @@ protected:
     SecondaryCheckDialog* ctrl_e_hint_dlg = nullptr;
     SecondaryCheckDialog* sdcard_hint_dlg = nullptr;
      
-    // TODO: Adapt to OrcaSlicer's FanControlPopupNew (different constructor signature)
+    // NOTE: FanControlPopup not available — OrcaSlicer uses FanControlPopupNew with different constructor signature
     // FanControlPopup* m_fan_control_popup{nullptr};
 
     wxString     m_request_url;

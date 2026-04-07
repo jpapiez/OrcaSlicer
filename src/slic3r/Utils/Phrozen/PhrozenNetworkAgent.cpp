@@ -23,7 +23,7 @@
 #include <netinet/if_ether.h>
 
 // Forward declarations for ARP resolution functions in MonitorControl namespace
-// TODO: Temporary setup to allow build pass on macOS. 
+// NOTE: Temporary setup to allow build pass on macOS.
 //       Future adjustment needed to ensure proper compilation and function calls.
 namespace MonitorControl {
     bool TriggerArpResolution(const std::string& target_ip);
