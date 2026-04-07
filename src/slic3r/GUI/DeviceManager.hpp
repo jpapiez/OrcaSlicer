@@ -133,7 +133,7 @@ private:
 
 public:
     MachineObject(DeviceManager* manager, NetworkAgent* agent, std::string name, std::string id, std::string ip);
-    ~MachineObject();
+    virtual ~MachineObject();
 
     void set_agent(NetworkAgent* agent) { m_agent = agent; }
 
@@ -148,6 +148,17 @@ public:
         PRINT_OP_AUTO_RECOVERY = 0,
         PRINT_OP_MAX,
     };
+
+    enum SdcardState {
+        NO_SDCARD = 0,
+        HAS_SDCARD_NORMAL = 1,
+        HAS_SDCARD_ABNORMAL = 2,
+        HAS_SDCARD_READONLY = 3,
+        SDCARD_STATE_NUM = 4,
+    };
+
+    SdcardState sdcard_state{NO_SDCARD};
+    SdcardState get_sdcard_state() { return sdcard_state; }
 
 public:
 
@@ -908,6 +919,15 @@ public:
     /* xcam save remove print file to local*/
     bool get_save_remote_print_file_to_storage() const { return xcam__save_remote_print_file_to_storage; };
     void command_set_save_remote_print_file_to_storage(bool save);
+
+    // Phrozen integration - filament commands (overridden by PhrozenMachineObject)
+    virtual void SetPhrozenCommand_load(int nSlotId) {}
+    virtual void SetPhrozenCommand_unload(int nSlotId) {}
+    virtual void SetPhrozenCommand_unload_all_slots() {}
+
+    virtual std::string GetConsolePageHyperlink() { return ""; }
+
+    static std::string get_preset_printer_model_name(const std::string& printer_type);
 
 private:
 

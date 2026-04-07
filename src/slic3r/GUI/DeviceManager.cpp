@@ -5567,4 +5567,9 @@ void change_the_opacity(wxColour& colour)
     }
 }
 
+std::string MachineObject::get_preset_printer_model_name(const std::string& printer_type)
+{
+    return DevPrinterConfigUtil::get_printer_display_name(printer_type);
+}
+
 } // namespace Slic3r

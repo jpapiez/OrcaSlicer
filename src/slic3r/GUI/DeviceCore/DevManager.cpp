@@ -922,4 +922,21 @@ namespace Slic3r
         // certificate
         agent->install_device_cert(obj->get_dev_id(), obj->is_lan_mode_printer());
     }
+
+std::vector<std::string> DeviceManager::get_compatible_machine(std::string type_str)
+{
+    return DevPrinterConfigUtil::get_compatible_machine(type_str);
+}
+
+std::map<std::string, MachineObject*> DeviceManager::get_local_machine_list()
+{
+    std::map<std::string, MachineObject*> result;
+    for (auto& pair : localMachineList) {
+        if (pair.second && pair.second->is_online()) {
+            result[pair.first] = pair.second;
+        }
+    }
+    return result;
+}
+
 }

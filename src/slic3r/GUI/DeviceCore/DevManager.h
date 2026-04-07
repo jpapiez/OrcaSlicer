@@ -111,6 +111,9 @@ public:
         std::string connection_type, std::string bind_state, std::string version,
         std::string access_code);
     static void update_local_machine(const MachineObject& m);
+
+    static std::vector<std::string> get_compatible_machine(std::string type_str);
+    std::map<std::string, MachineObject*> get_local_machine_list();
 };
 
 class DeviceManagerRefresher : public wxObject
