@@ -83,6 +83,9 @@
 #include "PhrozenGUI/PhrozenMonitorController.hpp"
 #include "PhrozenGUI/PhrozenDeviceManager.hpp"
 
+#include <boost/asio.hpp>
+#include <unordered_map>
+
 #include "../Utils/PresetUpdater.hpp"
 #include "../Utils/PrintHost.hpp"
 #include "../Utils/Process.hpp"
@@ -8116,6 +8119,105 @@ bool is_support_filament(int extruder_id, bool strict_check)
     if (support_option == nullptr) return false;
     return support_option->get_at(0);
 };
+
+PhrozenMachineObject* GUI_App::GetPhrozenMachineObject()
+{
+    return pPhrozenMachineObject ? pPhrozenMachineObject.get() : nullptr;
+}
+
+void GUI_App::GetCurrentConnectedMachineIp(std::string& strIp)
+{
+    strIp.clear();
+    if (pPhrozenMachineObject) {
+        strIp = pPhrozenMachineObject->get_dev_ip();
+    }
+}
+
+bool GUI_App::IsConnectingMachine()
+{
+    // TODO: Requires MonitorControl integration
+    return pPhrozenMachineObject != nullptr;
+}
+
+bool GUI_App::TestIsIpConnectValid(std::string strIp)
+{
+    // TODO: Full IP validation via MonitorControl
+    return !strIp.empty();
+}
+
+bool GUI_App::InitPhrozenConnector(const std::string& strIp)
+{
+    if (strIp.empty()) return false;
+
+    // Create or reset the Phrozen machine object
+    pPhrozenMachineObject = std::make_shared<PhrozenMachineObject>(strIp);
+
+    // Create device manager if needed
+    if (!m_spPhrozenManager) {
+        m_spPhrozenManager = std::make_unique<PhrozenDeviceManager>();
+    }
+
+    BOOST_LOG_TRIVIAL(info) << "InitPhrozenConnector: connecting to " << strIp;
+    return true;
+}
+
+void GUI_App::ProcessPhrozenConnector()
+{
+    if (!pPhrozenMachineObject) return;
+    BOOST_LOG_TRIVIAL(info) << "ProcessPhrozenConnector: starting communication threads";
+    // TODO: Start send/receive threads via PhrozenNetworkAgent
+}
+
+void GUI_App::ProcessPhrozenDisconnect()
+{
+    BOOST_LOG_TRIVIAL(info) << "ProcessPhrozenDisconnect: disconnecting";
+    pPhrozenMachineObject.reset();
+    // TODO: Stop send/receive threads
+}
+
+bool GUI_App::SearchPhrozenPrinter(std::unordered_map<std::string, std::string>& kResult)
+{
+    kResult.clear();
+
+    try {
+        boost::asio::io_context io_context;
+        boost::asio::ip::udp::socket socket(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0));
+        socket.set_option(boost::asio::socket_base::broadcast(true));
+
+        boost::asio::ip::udp::endpoint broadcast_endpoint(
+            boost::asio::ip::address_v4::broadcast(), 8989);
+
+        std::string message = "mkswifi";
+        socket.send_to(boost::asio::buffer(message), broadcast_endpoint);
+
+        // Wait for responses with timeout
+        socket.non_blocking(true);
+        auto start = std::chrono::steady_clock::now();
+        char recv_buf[1024];
+
+        while (std::chrono::steady_clock::now() - start < std::chrono::seconds(2)) {
+            boost::asio::ip::udp::endpoint sender_endpoint;
+            boost::system::error_code ec;
+            size_t len = socket.receive_from(boost::asio::buffer(recv_buf), sender_endpoint, 0, ec);
+
+            if (!ec && len > 0) {
+                std::string response(recv_buf, len);
+                std::string ip = sender_endpoint.address().to_string();
+                // Parse machine name from response (comma-separated: name,...)
+                auto comma_pos = response.find(',');
+                std::string name = (comma_pos != std::string::npos) ? response.substr(0, comma_pos) : response;
+                kResult[ip] = name;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        socket.close();
+    } catch (const std::exception& e) {
+        BOOST_LOG_TRIVIAL(error) << "SearchPhrozenPrinter error: " << e.what();
+        return false;
+    }
+
+    return !kResult.empty();
+}
 
 } // GUI
 } //Slic3r

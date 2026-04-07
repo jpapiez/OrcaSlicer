@@ -28,6 +28,7 @@
 
 #include <mutex>
 #include <stack>
+#include <unordered_map>
 
 //#define BBL_HAS_FIRST_PAGE          1
 #define STUDIO_INACTIVE_TIMEOUT     15*60*1000
@@ -63,6 +64,8 @@ class UserManager;
 class DeviceManager;
 class NetworkAgent;
 class TaskManager;
+class PhrozenMachineObject;
+class PhrozenDeviceManager;
 
 namespace GUI{
 
@@ -708,6 +711,25 @@ public:
 
     // Phrozen integration
     bool            IsPhrozenDeveloperMode() const { return m_bPhrozenDeveloperMode; }
+
+    // Phrozen integration - machine connection
+    std::shared_ptr<PhrozenMachineObject> pPhrozenMachineObject{nullptr};
+    PhrozenMachineObject* GetPhrozenMachineObject();
+    void GetCurrentConnectedMachineIp(std::string& strIp);
+    bool IsConnectingMachine();
+
+    // Phrozen integration - connector lifecycle
+    bool TestIsIpConnectValid(std::string strIp);
+    bool InitPhrozenConnector(const std::string& strIp);
+    void ProcessPhrozenConnector();
+    void ProcessPhrozenDisconnect();
+
+    // Phrozen integration - device manager
+    std::unique_ptr<PhrozenDeviceManager> m_spPhrozenManager{nullptr};
+    PhrozenDeviceManager* GetPhrozenDeviceManager() { return m_spPhrozenManager ? m_spPhrozenManager.get() : nullptr; }
+
+    // Phrozen integration - printer search
+    bool SearchPhrozenPrinter(std::unordered_map<std::string, std::string>& kResult);
 
 private:
     bool            m_bPhrozenDeveloperMode{ false };
