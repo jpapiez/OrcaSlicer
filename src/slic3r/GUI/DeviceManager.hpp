@@ -925,6 +925,26 @@ public:
     virtual void SetPhrozenCommand_unload(int nSlotId) {}
     virtual void SetPhrozenCommand_unload_all_slots() {}
 
+    // Phrozen integration - print control commands
+    virtual bool SetPhrozenCommand_pause() { return false; }
+    virtual bool SetPhrozenCommand_resume() { return false; }
+    virtual bool SetPhrozenCommand_abort() { return false; }
+    virtual bool IsPrintPaused() { return false; }
+
+    // Phrozen integration - temperature and cooling commands
+    virtual void SetPhrozenCommand_bed_temp(int nTemp) {}
+    virtual void SetPhrozenCommand_nozzle_temp(int nTemp) {}
+    virtual void SetPhrozenCommand_cooling_auxiliary(int nPower) {}
+    virtual void SetPhrozenCommand_cooling_part(int nPower) {}
+    virtual void SetPhrozenCommand_cooling_shield(int nPower) {}
+    virtual void SetPhrozenCommand_print_speed(float fValue) {}
+    virtual void SetPhrozenCommand_lighting_enabled(bool bEnabled) {}
+
+    // Phrozen integration - limits
+    virtual int GetPhrozenBedTemperature_limit() { return 300; }
+    virtual int GetPhrozenNozzleTemperature_limit() { return 300; }
+    virtual int GetPhrozenCoolingPower_limit() { return 100; }
+
     virtual std::string GetConsolePageHyperlink() { return ""; }
 
     static std::string get_preset_printer_model_name(const std::string& printer_type);
